@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""buzzer_node: /buzzer (Bool) 수신 시 터틀봇3 처음 켜질 때 나는 부팅음(Value 2) 출력"""
+"""buzzer_node: /buzzer (Bool) 수신 시 터틀봇3 버저 출력"""
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
