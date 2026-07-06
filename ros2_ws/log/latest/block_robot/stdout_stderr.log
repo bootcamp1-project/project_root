@@ -1,0 +1,44 @@
+running develop
+Removing /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block-robot.egg-link (link to .)
+running egg_info
+writing ../../build/block_robot/block_robot.egg-info/PKG-INFO
+writing dependency_links to ../../build/block_robot/block_robot.egg-info/dependency_links.txt
+writing entry points to ../../build/block_robot/block_robot.egg-info/entry_points.txt
+writing requirements to ../../build/block_robot/block_robot.egg-info/requires.txt
+writing top-level names to ../../build/block_robot/block_robot.egg-info/top_level.txt
+reading manifest file '../../build/block_robot/block_robot.egg-info/SOURCES.txt'
+writing manifest file '../../build/block_robot/block_robot.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/robot/ros2_ws/build/block_robot/build
+creating /home/robot/ros2_ws/build/block_robot/build/lib
+creating /home/robot/ros2_ws/build/block_robot/build/lib/block_robot
+copying block_robot/__init__.py -> /home/robot/ros2_ws/build/block_robot/build/lib/block_robot
+copying block_robot/test_ultrasonic.py -> /home/robot/ros2_ws/build/block_robot/build/lib/block_robot
+copying block_robot/ultrasonic_node.py -> /home/robot/ros2_ws/build/block_robot/build/lib/block_robot
+copying block_robot/interpreter_node.py -> /home/robot/ros2_ws/build/block_robot/build/lib/block_robot
+copying block_robot/buzzer_node.py -> /home/robot/ros2_ws/build/block_robot/build/lib/block_robot
+running install
+running install_lib
+creating /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot
+copying /home/robot/ros2_ws/build/block_robot/build/lib/block_robot/__init__.py -> /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot
+copying /home/robot/ros2_ws/build/block_robot/build/lib/block_robot/test_ultrasonic.py -> /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot
+copying /home/robot/ros2_ws/build/block_robot/build/lib/block_robot/ultrasonic_node.py -> /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot
+copying /home/robot/ros2_ws/build/block_robot/build/lib/block_robot/interpreter_node.py -> /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot
+copying /home/robot/ros2_ws/build/block_robot/build/lib/block_robot/buzzer_node.py -> /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot
+byte-compiling /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot/test_ultrasonic.py to test_ultrasonic.cpython-310.pyc
+byte-compiling /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot/ultrasonic_node.py to ultrasonic_node.cpython-310.pyc
+byte-compiling /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot/interpreter_node.py to interpreter_node.cpython-310.pyc
+byte-compiling /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot/buzzer_node.py to buzzer_node.cpython-310.pyc
+running install_data
+copying resource/block_robot -> /home/robot/ros2_ws/install/block_robot/share/ament_index/resource_index/packages
+copying package.xml -> /home/robot/ros2_ws/install/block_robot/share/block_robot
+copying launch/bringup.launch.py -> /home/robot/ros2_ws/install/block_robot/share/block_robot/launch
+running install_egg_info
+Copying ../../build/block_robot/block_robot.egg-info to /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot-0.0.1-py3.10.egg-info
+running install_scripts
+Installing buzzer_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot
+Installing interpreter_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot
+Installing ultrasonic_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot
+writing list of installed files to '/home/robot/ros2_ws/build/block_robot/install.log'

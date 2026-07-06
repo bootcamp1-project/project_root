@@ -1,0 +1,28 @@
+[4.468s] Invoking command in '/home/robot/ros2_ws/build/block_robot': PYTHONPATH=/home/robot/ros2_ws/build/block_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/robot/ros2_ws/build/block_robot/build --no-deps symlink_data
+[5.743s] running develop
+[6.584s] running egg_info
+[6.585s] creating block_robot.egg-info
+[6.585s] writing block_robot.egg-info/PKG-INFO
+[6.586s] writing dependency_links to block_robot.egg-info/dependency_links.txt
+[6.587s] writing entry points to block_robot.egg-info/entry_points.txt
+[6.588s] writing requirements to block_robot.egg-info/requires.txt
+[6.588s] writing top-level names to block_robot.egg-info/top_level.txt
+[6.589s] writing manifest file 'block_robot.egg-info/SOURCES.txt'
+[6.597s] reading manifest file 'block_robot.egg-info/SOURCES.txt'
+[6.599s] writing manifest file 'block_robot.egg-info/SOURCES.txt'
+[6.606s] running build_ext
+[6.607s] Creating /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block-robot.egg-link (link to .)
+[6.610s] Installing buzzer_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot
+[6.611s] Installing interpreter_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot
+[6.611s] Installing ultrasonic_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot
+[6.613s] 
+[6.613s] Installed /home/robot/ros2_ws/build/block_robot
+[6.614s] running symlink_data
+[6.614s] creating /home/robot/ros2_ws/install/block_robot/share/ament_index
+[6.614s] creating /home/robot/ros2_ws/install/block_robot/share/ament_index/resource_index
+[6.615s] creating /home/robot/ros2_ws/install/block_robot/share/ament_index/resource_index/packages
+[6.615s] symbolically linking /home/robot/ros2_ws/build/block_robot/resource/block_robot -> /home/robot/ros2_ws/install/block_robot/share/ament_index/resource_index/packages
+[6.616s] symbolically linking /home/robot/ros2_ws/build/block_robot/package.xml -> /home/robot/ros2_ws/install/block_robot/share/block_robot
+[6.617s] creating /home/robot/ros2_ws/install/block_robot/share/block_robot/launch
+[6.618s] symbolically linking /home/robot/ros2_ws/build/block_robot/launch/bringup.launch.py -> /home/robot/ros2_ws/install/block_robot/share/block_robot/launch
+[6.751s] Invoked command in '/home/robot/ros2_ws/build/block_robot' returned '0': PYTHONPATH=/home/robot/ros2_ws/build/block_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/robot/ros2_ws/build/block_robot/build --no-deps symlink_data

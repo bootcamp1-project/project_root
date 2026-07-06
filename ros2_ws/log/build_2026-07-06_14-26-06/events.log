@@ -1,0 +1,120 @@
+[0.000000] (-) TimerEvent: {}
+[0.001518] (block_robot) JobQueued: {'identifier': 'block_robot', 'dependencies': OrderedDict()}
+[0.002138] (block_robot) JobStarted: {'identifier': 'block_robot'}
+[0.098940] (-) TimerEvent: {}
+[0.199595] (-) TimerEvent: {}
+[0.300272] (-) TimerEvent: {}
+[0.401014] (-) TimerEvent: {}
+[0.501790] (-) TimerEvent: {}
+[0.602402] (-) TimerEvent: {}
+[0.703052] (-) TimerEvent: {}
+[0.803643] (-) TimerEvent: {}
+[0.904231] (-) TimerEvent: {}
+[1.004939] (-) TimerEvent: {}
+[1.105837] (-) TimerEvent: {}
+[1.206454] (-) TimerEvent: {}
+[1.307207] (-) TimerEvent: {}
+[1.408279] (-) TimerEvent: {}
+[1.508924] (-) TimerEvent: {}
+[1.609631] (-) TimerEvent: {}
+[1.710461] (-) TimerEvent: {}
+[1.811291] (-) TimerEvent: {}
+[1.911947] (-) TimerEvent: {}
+[2.012632] (-) TimerEvent: {}
+[2.113249] (-) TimerEvent: {}
+[2.213893] (-) TimerEvent: {}
+[2.314502] (-) TimerEvent: {}
+[2.415123] (-) TimerEvent: {}
+[2.515816] (-) TimerEvent: {}
+[2.616478] (-) TimerEvent: {}
+[2.717090] (-) TimerEvent: {}
+[2.817722] (-) TimerEvent: {}
+[2.918457] (-) TimerEvent: {}
+[3.019672] (-) TimerEvent: {}
+[3.042139] (block_robot) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'develop', '--uninstall', '--editable', '--build-directory', '/home/robot/ros2_ws/build/block_robot/build'], 'cwd': '/home/robot/ros2_ws/build/block_robot', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'robot', 'SSH_CLIENT': '192.168.0.16 45794 22', 'XDG_SESSION_TYPE': 'tty', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/home/robot/turtlebot3_ws/install/coin_d4_driver/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib', 'MOTD_SHOWN': 'pam', 'HOME': '/home/robot', 'OLDPWD': '/home/robot/ros2_ws/src/block_robot', 'SSH_TTY': '/dev/pts/2', 'ROS_PYTHON_VERSION': '3', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLCON_PREFIX_PATH': '/home/robot/ros2_ws/install:/home/robot/turtlebot3_ws/install', 'ROS_DISTRO': 'humble', 'LOGNAME': 'robot', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': '4', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin', 'XDG_RUNTIME_DIR': '/run/user/1000', 'LANG': 'en_US.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '20', 'AMENT_PREFIX_PATH': '/home/robot/ros2_ws/install/block_robot:/home/robot/turtlebot3_ws/install/turtlebot3:/home/robot/turtlebot3_ws/install/turtlebot3_teleop:/home/robot/turtlebot3_ws/install/turtlebot3_bringup:/home/robot/turtlebot3_ws/install/turtlebot3_node:/home/robot/turtlebot3_ws/install/turtlebot3_example:/home/robot/turtlebot3_ws/install/turtlebot3_description:/home/robot/turtlebot3_ws/install/my_robot_scripts:/home/robot/turtlebot3_ws/install/ld08_driver:/home/robot/turtlebot3_ws/install/coin_d4_driver:/opt/ros/humble', 'SHELL': '/bin/bash', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'PWD': '/home/robot/ros2_ws/build/block_robot', 'TURTLEBOT3_MODEL': 'burger', 'LC_ALL': 'en_US.UTF-8', 'SSH_CONNECTION': '192.168.0.16 45794 192.168.0.15 22', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'LDS_MODEL': 'LDS-03', 'PYTHONPATH': '/home/robot/ros2_ws/build/block_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages:/home/robot/ros2_ws/build/block_robot:/home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages:/home/robot/turtlebot3_ws/build/turtlebot3_teleop:/home/robot/turtlebot3_ws/install/turtlebot3_teleop/lib/python3.10/site-packages:/home/robot/turtlebot3_ws/build/turtlebot3_example:/home/robot/turtlebot3_ws/install/turtlebot3_example/lib/python3.10/site-packages:/home/robot/turtlebot3_ws/build/my_robot_scripts:/home/robot/turtlebot3_ws/install/my_robot_scripts/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/home/robot/turtlebot3_ws/install/turtlebot3:/home/robot/turtlebot3_ws/install/turtlebot3_bringup:/home/robot/turtlebot3_ws/install/turtlebot3_node:/home/robot/turtlebot3_ws/install/turtlebot3_description:/home/robot/turtlebot3_ws/install/ld08_driver:/home/robot/turtlebot3_ws/install/coin_d4_driver'}, 'shell': False}
+[3.120184] (-) TimerEvent: {}
+[3.220978] (-) TimerEvent: {}
+[3.321686] (-) TimerEvent: {}
+[3.422332] (-) TimerEvent: {}
+[3.522976] (-) TimerEvent: {}
+[3.623678] (-) TimerEvent: {}
+[3.724686] (-) TimerEvent: {}
+[3.825317] (-) TimerEvent: {}
+[3.926165] (-) TimerEvent: {}
+[4.026772] (-) TimerEvent: {}
+[4.127398] (-) TimerEvent: {}
+[4.228109] (-) TimerEvent: {}
+[4.310650] (block_robot) StdoutLine: {'line': b'running develop\n'}
+[4.328269] (-) TimerEvent: {}
+[4.428937] (-) TimerEvent: {}
+[4.529543] (-) TimerEvent: {}
+[4.630224] (-) TimerEvent: {}
+[4.730822] (-) TimerEvent: {}
+[4.831419] (-) TimerEvent: {}
+[4.932020] (-) TimerEvent: {}
+[5.032635] (-) TimerEvent: {}
+[5.133262] (-) TimerEvent: {}
+[5.153072] (block_robot) StdoutLine: {'line': b'Removing /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block-robot.egg-link (link to .)\n'}
+[5.233550] (-) TimerEvent: {}
+[5.286628] (block_robot) CommandEnded: {'returncode': 0}
+[5.289889] (block_robot) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../build/block_robot', 'build', '--build-base', '/home/robot/ros2_ws/build/block_robot/build', 'install', '--record', '/home/robot/ros2_ws/build/block_robot/install.log', '--install-scripts', '$base/lib/block_robot', '--single-version-externally-managed', 'install_data', '--force'], 'cwd': '/home/robot/ros2_ws/src/block_robot', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'robot', 'SSH_CLIENT': '192.168.0.16 45794 22', 'XDG_SESSION_TYPE': 'tty', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/home/robot/turtlebot3_ws/install/coin_d4_driver/lib:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib', 'MOTD_SHOWN': 'pam', 'HOME': '/home/robot', 'OLDPWD': '/home/robot/ros2_ws/src/block_robot', 'SSH_TTY': '/dev/pts/2', 'ROS_PYTHON_VERSION': '3', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLCON_PREFIX_PATH': '/home/robot/ros2_ws/install:/home/robot/turtlebot3_ws/install', 'ROS_DISTRO': 'humble', 'LOGNAME': 'robot', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': '4', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin', 'XDG_RUNTIME_DIR': '/run/user/1000', 'LANG': 'en_US.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '20', 'AMENT_PREFIX_PATH': '/home/robot/ros2_ws/install/block_robot:/home/robot/turtlebot3_ws/install/turtlebot3:/home/robot/turtlebot3_ws/install/turtlebot3_teleop:/home/robot/turtlebot3_ws/install/turtlebot3_bringup:/home/robot/turtlebot3_ws/install/turtlebot3_node:/home/robot/turtlebot3_ws/install/turtlebot3_example:/home/robot/turtlebot3_ws/install/turtlebot3_description:/home/robot/turtlebot3_ws/install/my_robot_scripts:/home/robot/turtlebot3_ws/install/ld08_driver:/home/robot/turtlebot3_ws/install/coin_d4_driver:/opt/ros/humble', 'SHELL': '/bin/bash', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'PWD': '/home/robot/ros2_ws/build/block_robot', 'TURTLEBOT3_MODEL': 'burger', 'LC_ALL': 'en_US.UTF-8', 'SSH_CONNECTION': '192.168.0.16 45794 192.168.0.15 22', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'LDS_MODEL': 'LDS-03', 'PYTHONPATH': '/home/robot/ros2_ws/build/block_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages:/home/robot/ros2_ws/build/block_robot:/home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages:/home/robot/turtlebot3_ws/build/turtlebot3_teleop:/home/robot/turtlebot3_ws/install/turtlebot3_teleop/lib/python3.10/site-packages:/home/robot/turtlebot3_ws/build/turtlebot3_example:/home/robot/turtlebot3_ws/install/turtlebot3_example/lib/python3.10/site-packages:/home/robot/turtlebot3_ws/build/my_robot_scripts:/home/robot/turtlebot3_ws/install/my_robot_scripts/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1', 'CMAKE_PREFIX_PATH': '/home/robot/turtlebot3_ws/install/turtlebot3:/home/robot/turtlebot3_ws/install/turtlebot3_bringup:/home/robot/turtlebot3_ws/install/turtlebot3_node:/home/robot/turtlebot3_ws/install/turtlebot3_description:/home/robot/turtlebot3_ws/install/ld08_driver:/home/robot/turtlebot3_ws/install/coin_d4_driver'}, 'shell': False}
+[5.333703] (-) TimerEvent: {}
+[5.434788] (-) TimerEvent: {}
+[5.535458] (-) TimerEvent: {}
+[5.636064] (-) TimerEvent: {}
+[5.736696] (-) TimerEvent: {}
+[5.837282] (-) TimerEvent: {}
+[5.937939] (-) TimerEvent: {}
+[6.038546] (-) TimerEvent: {}
+[6.139120] (-) TimerEvent: {}
+[6.239819] (-) TimerEvent: {}
+[6.340497] (-) TimerEvent: {}
+[6.441152] (-) TimerEvent: {}
+[6.474435] (block_robot) StdoutLine: {'line': b'running egg_info\n'}
+[6.477196] (block_robot) StdoutLine: {'line': b'writing ../../build/block_robot/block_robot.egg-info/PKG-INFO\n'}
+[6.478257] (block_robot) StdoutLine: {'line': b'writing dependency_links to ../../build/block_robot/block_robot.egg-info/dependency_links.txt\n'}
+[6.479137] (block_robot) StdoutLine: {'line': b'writing entry points to ../../build/block_robot/block_robot.egg-info/entry_points.txt\n'}
+[6.479955] (block_robot) StdoutLine: {'line': b'writing requirements to ../../build/block_robot/block_robot.egg-info/requires.txt\n'}
+[6.480507] (block_robot) StdoutLine: {'line': b'writing top-level names to ../../build/block_robot/block_robot.egg-info/top_level.txt\n'}
+[6.488665] (block_robot) StdoutLine: {'line': b"reading manifest file '../../build/block_robot/block_robot.egg-info/SOURCES.txt'\n"}
+[6.492358] (block_robot) StdoutLine: {'line': b"writing manifest file '../../build/block_robot/block_robot.egg-info/SOURCES.txt'\n"}
+[6.492978] (block_robot) StdoutLine: {'line': b'running build\n'}
+[6.493452] (block_robot) StdoutLine: {'line': b'running build_py\n'}
+[6.494005] (block_robot) StdoutLine: {'line': b'creating /home/robot/ros2_ws/build/block_robot/build\n'}
+[6.494922] (block_robot) StdoutLine: {'line': b'creating /home/robot/ros2_ws/build/block_robot/build/lib\n'}
+[6.495279] (block_robot) StdoutLine: {'line': b'creating /home/robot/ros2_ws/build/block_robot/build/lib/block_robot\n'}
+[6.495716] (block_robot) StdoutLine: {'line': b'copying block_robot/__init__.py -> /home/robot/ros2_ws/build/block_robot/build/lib/block_robot\n'}
+[6.496064] (block_robot) StdoutLine: {'line': b'copying block_robot/test_ultrasonic.py -> /home/robot/ros2_ws/build/block_robot/build/lib/block_robot\n'}
+[6.496486] (block_robot) StdoutLine: {'line': b'copying block_robot/ultrasonic_node.py -> /home/robot/ros2_ws/build/block_robot/build/lib/block_robot\n'}
+[6.496872] (block_robot) StdoutLine: {'line': b'copying block_robot/interpreter_node.py -> /home/robot/ros2_ws/build/block_robot/build/lib/block_robot\n'}
+[6.497546] (block_robot) StdoutLine: {'line': b'copying block_robot/buzzer_node.py -> /home/robot/ros2_ws/build/block_robot/build/lib/block_robot\n'}
+[6.498775] (block_robot) StdoutLine: {'line': b'running install\n'}
+[6.500002] (block_robot) StdoutLine: {'line': b'running install_lib\n'}
+[6.503075] (block_robot) StdoutLine: {'line': b'creating /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot\n'}
+[6.503625] (block_robot) StdoutLine: {'line': b'copying /home/robot/ros2_ws/build/block_robot/build/lib/block_robot/__init__.py -> /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot\n'}
+[6.504179] (block_robot) StdoutLine: {'line': b'copying /home/robot/ros2_ws/build/block_robot/build/lib/block_robot/test_ultrasonic.py -> /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot\n'}
+[6.505001] (block_robot) StdoutLine: {'line': b'copying /home/robot/ros2_ws/build/block_robot/build/lib/block_robot/ultrasonic_node.py -> /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot\n'}
+[6.505833] (block_robot) StdoutLine: {'line': b'copying /home/robot/ros2_ws/build/block_robot/build/lib/block_robot/interpreter_node.py -> /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot\n'}
+[6.506624] (block_robot) StdoutLine: {'line': b'copying /home/robot/ros2_ws/build/block_robot/build/lib/block_robot/buzzer_node.py -> /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot\n'}
+[6.514352] (block_robot) StdoutLine: {'line': b'byte-compiling /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot/__init__.py to __init__.cpython-310.pyc\n'}
+[6.515665] (block_robot) StdoutLine: {'line': b'byte-compiling /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot/test_ultrasonic.py to test_ultrasonic.cpython-310.pyc\n'}
+[6.517971] (block_robot) StdoutLine: {'line': b'byte-compiling /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot/ultrasonic_node.py to ultrasonic_node.cpython-310.pyc\n'}
+[6.520838] (block_robot) StdoutLine: {'line': b'byte-compiling /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot/interpreter_node.py to interpreter_node.cpython-310.pyc\n'}
+[6.525904] (block_robot) StdoutLine: {'line': b'byte-compiling /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot/buzzer_node.py to buzzer_node.cpython-310.pyc\n'}
+[6.527696] (block_robot) StdoutLine: {'line': b'running install_data\n'}
+[6.528264] (block_robot) StdoutLine: {'line': b'copying resource/block_robot -> /home/robot/ros2_ws/install/block_robot/share/ament_index/resource_index/packages\n'}
+[6.528821] (block_robot) StdoutLine: {'line': b'copying package.xml -> /home/robot/ros2_ws/install/block_robot/share/block_robot\n'}
+[6.529799] (block_robot) StdoutLine: {'line': b'copying launch/bringup.launch.py -> /home/robot/ros2_ws/install/block_robot/share/block_robot/launch\n'}
+[6.530446] (block_robot) StdoutLine: {'line': b'running install_egg_info\n'}
+[6.537368] (block_robot) StdoutLine: {'line': b'Copying ../../build/block_robot/block_robot.egg-info to /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block_robot-0.0.1-py3.10.egg-info\n'}
+[6.541309] (-) TimerEvent: {}
+[6.542899] (block_robot) StdoutLine: {'line': b'running install_scripts\n'}
+[6.623900] (block_robot) StdoutLine: {'line': b'Installing buzzer_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot\n'}
+[6.624748] (block_robot) StdoutLine: {'line': b'Installing interpreter_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot\n'}
+[6.625526] (block_robot) StdoutLine: {'line': b'Installing ultrasonic_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot\n'}
+[6.627400] (block_robot) StdoutLine: {'line': b"writing list of installed files to '/home/robot/ros2_ws/build/block_robot/install.log'\n"}
+[6.641665] (-) TimerEvent: {}
+[6.742671] (-) TimerEvent: {}
+[6.745916] (block_robot) CommandEnded: {'returncode': 0}
+[6.796708] (block_robot) JobEnded: {'identifier': 'block_robot', 'rc': 0}
+[6.799382] (-) EventReactorShutdown: {}

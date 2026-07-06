@@ -1,0 +1,26 @@
+running develop
+running egg_info
+creating block_robot.egg-info
+writing block_robot.egg-info/PKG-INFO
+writing dependency_links to block_robot.egg-info/dependency_links.txt
+writing entry points to block_robot.egg-info/entry_points.txt
+writing requirements to block_robot.egg-info/requires.txt
+writing top-level names to block_robot.egg-info/top_level.txt
+writing manifest file 'block_robot.egg-info/SOURCES.txt'
+reading manifest file 'block_robot.egg-info/SOURCES.txt'
+writing manifest file 'block_robot.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/robot/ros2_ws/install/block_robot/lib/python3.10/site-packages/block-robot.egg-link (link to .)
+Installing buzzer_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot
+Installing interpreter_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot
+Installing ultrasonic_node script to /home/robot/ros2_ws/install/block_robot/lib/block_robot
+
+Installed /home/robot/ros2_ws/build/block_robot
+running symlink_data
+creating /home/robot/ros2_ws/install/block_robot/share/ament_index
+creating /home/robot/ros2_ws/install/block_robot/share/ament_index/resource_index
+creating /home/robot/ros2_ws/install/block_robot/share/ament_index/resource_index/packages
+symbolically linking /home/robot/ros2_ws/build/block_robot/resource/block_robot -> /home/robot/ros2_ws/install/block_robot/share/ament_index/resource_index/packages
+symbolically linking /home/robot/ros2_ws/build/block_robot/package.xml -> /home/robot/ros2_ws/install/block_robot/share/block_robot
+creating /home/robot/ros2_ws/install/block_robot/share/block_robot/launch
+symbolically linking /home/robot/ros2_ws/build/block_robot/launch/bringup.launch.py -> /home/robot/ros2_ws/install/block_robot/share/block_robot/launch

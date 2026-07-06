@@ -1,0 +1,5 @@
+[console_scripts]
+buzzer_node = block_robot.buzzer_node:main
+interpreter_node = block_robot.interpreter_node:main
+ultrasonic_node = block_robot.ultrasonic_node:main
+
