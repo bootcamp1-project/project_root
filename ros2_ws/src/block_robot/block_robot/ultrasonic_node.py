@@ -1,73 +1,54 @@
 #!/usr/bin/env python3
-"""ultrasonic_node: HC-SR04 초음파 센서로 거리 측정 -> /obstacle_dist (Float32, 10Hz)"""
-import time
+"""ultrasonic_node: 라이다(LDS-03)로 전방/후방 거리 동시 측정"""
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
-
-TRIG_PIN = 23
-ECHO_PIN = 24
-MAX_WAIT = 0.03        
-PUBLISH_HZ = 10.0
-
-try:
-    import RPi.GPIO as GPIO
-    HW_AVAILABLE = True
-except (ImportError, RuntimeError):
-    HW_AVAILABLE = False
-
+from sensor_msgs.msg import LaserScan
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 
 class UltrasonicNode(Node):
     def __init__(self):
         super().__init__('ultrasonic_node')
-        self.pub = self.create_publisher(Float32, '/obstacle_dist', 10)
+        
+        # 전방과 후방 거리를 각각 발행할 2개의 퍼블리셔 생성
+        self.pub_front = self.create_publisher(Float32, '/obstacle_dist/front', 10)
+        self.pub_rear = self.create_publisher(Float32, '/obstacle_dist/rear', 10)
 
-        if HW_AVAILABLE:
-            GPIO.setmode(GPIO.BCM)
-            GPIO.setup(TRIG_PIN, GPIO.OUT)
-            GPIO.setup(ECHO_PIN, GPIO.IN)
-            GPIO.output(TRIG_PIN, False)
-            time.sleep(0.3)
-            self.get_logger().info('HC-SR04 초기화 완료')
-        else:
-            self.get_logger().warn('RPi.GPIO를 사용할 수 없음 -> 더미 값 발행')
+        qos_profile = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10
+        )
 
-        self.timer = self.create_timer(1.0 / PUBLISH_HZ, self.tick)
+        self.sub = self.create_subscription(
+            LaserScan,
+            '/scan',
+            self.scan_callback,
+            qos_profile
+        )
+        self.get_logger().info('🚀 [전/후방 감시] 라이다 센서가 앞뒤를 모두 감시합니다!')
 
-    def measure_once(self):
-        if not HW_AVAILABLE:
-            return None
-        GPIO.output(TRIG_PIN, True)
-        time.sleep(0.00001)
-        GPIO.output(TRIG_PIN, False)
+    def scan_callback(self, msg):
+        if not msg.ranges:
+            return
 
-        start = time.time()
-        timeout = start + MAX_WAIT
-        while GPIO.input(ECHO_PIN) == 0:
-            start = time.time()
-            if start > timeout:
-                return None
+        # 정면 (0도 기준 좌우 5도)
+        front_ranges = msg.ranges[0:5] + msg.ranges[355:360]
+        # 후방 (180도 기준 좌우 5도 -> 175도 ~ 185도)
+        rear_ranges = msg.ranges[175:185]
+        
+        # 유효한 거리(m)만 필터링
+        valid_front = [r for r in front_ranges if msg.range_min < r < msg.range_max]
+        valid_rear = [r for r in rear_ranges if msg.range_min < r < msg.range_max]
 
-        stop = time.time()
-        timeout = stop + MAX_WAIT
-        while GPIO.input(ECHO_PIN) == 1:
-            stop = time.time()
-            if stop > timeout:
-                return None
+        msg_f = Float32()
+        msg_r = Float32()
+        
+        msg_f.data = float(min(valid_front)) if valid_front else 999.0
+        msg_r.data = float(min(valid_rear)) if valid_rear else 999.0
 
-        elapsed = stop - start
-        distance_m = (elapsed * 343.0) / 2.0
-        return distance_m
-
-    def tick(self):
-        msg = Float32()
-        if HW_AVAILABLE:
-            d = self.measure_once()
-            msg.data = float(d) if d is not None else 999.0
-        else:
-            msg.data = 999.0
-        self.pub.publish(msg)
-
+        self.pub_front.publish(msg_f)
+        self.pub_rear.publish(msg_r)
 
 def main():
     rclpy.init()
@@ -77,11 +58,8 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
-        if HW_AVAILABLE:
-            GPIO.cleanup()
         node.destroy_node()
         rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
