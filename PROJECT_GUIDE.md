@@ -13,7 +13,7 @@
 - 블록 코딩으로 프로그램 작성
 - 블록 순차 실행
 - 현재 실행 블록 하이라이트
-- 초음파 센서를 이용한 안전 정지
+- 라이다(LiDAR) 센서를 이용한 안전 정지
 - 실행 중 정지 버튼
 - 사용자 테스트 기반 UX 개선
 
@@ -31,7 +31,7 @@ interpreter_node (웹소켓 서버 내장)
     └── /run_state
           ▲
           │
-  Ultrasonic Node
+  LiDAR Node (ultrasonic_node.py)
 ```
 
 ---
