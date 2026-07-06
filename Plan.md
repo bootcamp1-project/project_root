@@ -21,7 +21,7 @@
 
 본 프로젝트는 ROS 2와 TurtleBot3를 활용하여 초등학생도 쉽게 사용할 수 있는 블록 코딩 기반 로봇 제어 시스템을 개발하는 것을 목표로 한다. 사용자는 웹 브라우저에서 블록을 조합하여 프로그램을 작성하고, 로봇이 해당 명령을 순차적으로 수행하는 과정을 실시간으로 확인할 수 있다.
 
-또한 초음파 센서를 이용한 장애물 감지 기능을 적용하여 교육 환경에서도 안전하게 사용할 수 있도록 설계한다.
+또한 라이다(LiDAR) 센서를 이용한 장애물 감지 기능을 적용하여 교육 환경에서도 안전하게 사용할 수 있도록 설계한다.
 
 ### 1.2 프로젝트 목표
 
@@ -31,7 +31,7 @@
 - 블록 프로그램을 JSON 형식으로 변환
 - Interpreter Node를 이용한 블록 순차 실행
 - ROS 2와 웹 간 실시간 통신 구현
-- 초음파 센서를 활용한 안전 기능 구현
+- 라이다(LiDAR) 센서를 활용한 안전 기능 구현
 - 사용자 중심 UI/UX 설계
 - 실제 사용자 테스트를 통한 개선 사항 도출
 
@@ -75,11 +75,7 @@
    - 실행 상태 표시
         │
         ▼
-② rosbridge_server
-   (웹과 ROS 2를 WebSocket으로 연결)
-        │
-        ▼
-③ Interpreter Node
+② Interpreter Node (웹소켓 서버 내장)
    JSON 프로그램을 해석하여 아래 명령을 순차적으로 실행
    - 전진
    - 좌회전
@@ -88,9 +84,9 @@
    - 대기
         │
         ▼
-④ TurtleBot 및 센서
+③ TurtleBot 및 센서
    - TurtleBot3
-   - 초음파 센서
+   - 라이다(LiDAR) 센서
    - 부저
 ```
 
@@ -118,12 +114,12 @@
 - rclpy
 - geometry_msgs
 - std_msgs
-- rosbridge_suite
+- websockets (interpreter_node 내장 웹소켓 서버)
 
 ### Hardware
 
 - TurtleBot3
-- Ultrasonic Sensor
+- LiDAR Sensor (LDS-03)
 - Buzzer
 
 ---
@@ -169,7 +165,7 @@
 
 | 위험 요소 | 대응 방안 |
 | --- | --- |
-| WebSocket 연결 실패 | rosbridge 연결 상태 확인 및 재접속 기능 구현 |
+| WebSocket 연결 실패 | interpreter_node 웹소켓 서버 연결 상태 확인 및 재접속 기능 구현 |
 | 블록 실행 오류 | JSON 형식 검증 및 예외 처리 |
 | 센서 오동작 | 거리 임계값 보정 및 반복 테스트 |
 | 로봇 제어 지연 | 명령 주기 최적화 및 QoS 설정 |
