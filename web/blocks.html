@@ -13,6 +13,7 @@
     --ink:#2E3350;
     --card:#FFFFFF;
     --forward:#3FB27F;
+    --backward:#FF70B8; /* 후진 블록 예쁜 핑크색 */
     --turn:#4C8DFF;
     --buzzer:#FFC93C;
     --wait:#A784FF;
@@ -33,7 +34,7 @@
     overscroll-behavior:none;
     -webkit-tap-highlight-color: transparent;
     user-select:none;
-    overflow: hidden; /* 바깥 브라우저 창 전체 스크롤 방지 */
+    overflow: hidden;
   }
   h1,h2,.title-font{font-family:'Jua',sans-serif;}
 
@@ -90,8 +91,8 @@
     display:flex;
     flex-direction:column;
     gap:14px;
-    padding:0 16px 140px; /* 하단 풋터 공간 확보 */
-    overflow: hidden;    /* 메인 자체는 넘치지 않게 잠금 */
+    padding:0 16px 140px;
+    overflow: hidden;
   }
 
   #palette{
@@ -101,7 +102,7 @@
     background:rgba(255,255,255,0.6);
     padding:12px;
     border-radius:20px;
-    flex-shrink: 0; /* 팔레트 크기 고정 */
+    flex-shrink: 0;
   }
   .paletteBtn{
     min-height:72px;
@@ -122,21 +123,21 @@
   .paletteBtn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,0.12);}
   .paletteBtn .emoji{font-size:30px;}
   .pb-forward{background:var(--forward);}
+  .pb-backward{background:var(--backward);} /* 팔레트 후진 */
   .pb-turn_left{background:var(--turn);}
   .pb-turn_right{background:var(--turn);}
   .pb-buzzer{background:var(--buzzer); color:#5b4600;}
   .pb-wait{background:var(--wait);}
   .pb-repeat{background:var(--repeat);}
 
-  /* 📜 [나의 프로그램 영역 스크롤바 대공사] */
   #programArea{
     background:rgba(255,255,255,0.55);
     border-radius:20px;
     padding:14px;
-    flex: 1;             /* 남은 화면 높이를 전부 차지 */
+    flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;    /* 내부 리스트만 스크롤되도록 외부 잠금 */
+    overflow: hidden;
   }
   #programArea h2{margin:0 0 10px 4px; font-size:18px; flex-shrink: 0;}
   
@@ -146,29 +147,17 @@
     display:flex;
     flex-direction:column;
     gap:10px;
-    
-    /* 📜 여기에 진짜 자동 스크롤바 생성 속성 부여! */
     flex: 1;
     overflow-y: auto;    
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    padding-right: 4px; /* 스크롤바가 블록이랑 겹치지 않게 여백 */
+    padding-right: 4px;
   }
 
-  /* 🎨 내장 예쁜 스크롤바 스타일 */
-  #programList::-webkit-scrollbar {
-    width: 6px;
-  }
-  #programList::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  #programList::-webkit-scrollbar-thumb {
-    background: rgba(46, 51, 80, 0.3);
-    border-radius: 10px;
-  }
-  #programList::-webkit-scrollbar-thumb:hover {
-    background: rgba(46, 51, 80, 0.5);
-  }
+  #programList::-webkit-scrollbar { width: 6px; }
+  #programList::-webkit-scrollbar-track { background: transparent; }
+  #programList::-webkit-scrollbar-thumb { background: rgba(46, 51, 80, 0.3); border-radius: 10px; }
+  #programList::-webkit-scrollbar-thumb:hover { background: rgba(46, 51, 80, 0.5); }
 
   #emptyHint{
     text-align:center;
@@ -188,7 +177,7 @@
     min-height:60px;
     cursor:grab;
     position:relative;
-    flex-shrink: 0; /* 스크롤 안에서 찌그러짐 방지 */
+    flex-shrink: 0;
   }
   .block.dragging{opacity:.4;}
   .block .emoji{font-size:26px; flex-shrink:0;}
@@ -216,6 +205,7 @@
     flex-shrink:0;
   }
   .b-forward{background:var(--forward);}
+  .b-backward{background:var(--backward);} /* 리스트 후진 */
   .b-turn_left{background:var(--turn);}
   .b-turn_right{background:var(--turn);}
   .b-buzzer{background:var(--buzzer); color:#5b4600;}
@@ -413,6 +403,7 @@
 <main>
   <section id="palette" aria-label="블록 팔레트">
     <button class="paletteBtn pb-forward" data-op="forward"><span class="emoji">⬆️</span>앞으로</button>
+    <button class="paletteBtn pb-backward" data-op="backward"><span class="emoji">⬇️</span>뒤로</button>
     <button class="paletteBtn pb-turn_left" data-op="turn_left"><span class="emoji">↩️</span>왼쪽</button>
     <button class="paletteBtn pb-turn_right" data-op="turn_right"><span class="emoji">↪️</span>오른쪽</button>
     <button class="paletteBtn pb-buzzer" data-op="buzzer"><span class="emoji">🔔</span>소리</button>
@@ -452,6 +443,7 @@ const simToggle = document.getElementById('simToggle');
 
 const OP_META = {
   forward:  {emoji:'⬆️', label:'앞으로', cls:'forward', hasSec:true},
+  backward: {emoji:'⬇️', label:'뒤로 가기', cls:'backward', hasSec:true}, // 후진 메타 데이터 추가
   turn_left:{emoji:'↩️', label:'왼쪽으로 돌기', cls:'turn_left'},
   turn_right:{emoji:'↪️', label:'오른쪽으로 돌기', cls:'turn_right'},
   buzzer:   {emoji:'🔔', label:'소리 내기', cls:'buzzer'},
@@ -459,6 +451,7 @@ const OP_META = {
   repeat:   {emoji:'🔁', label:'반복하기', cls:'repeat', hasCount:true},
 };
 
+// 기본 동작음
 function playLaptopBuzzer() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -488,9 +481,41 @@ function playLaptopBuzzer() {
   }
 }
 
+// 장애물 감지 비상 정지 경고음 (띠-띡!)
+function playErrorSound() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    
+    const notes = [493.88, 349.23]; // 하강하는 경고음
+    const duration = 0.15;
+
+    notes.forEach((freq, index) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sawtooth';
+      osc.frequency.value = freq;
+      
+      gain.gain.setValueAtTime(0.2, ctx.currentTime + index * duration);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (index + 1) * duration);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(ctx.currentTime + index * duration);
+      osc.stop(ctx.currentTime + (index + 1) * duration);
+    });
+  } catch(e) {
+    console.error("경고음 구동 실패:", e);
+  }
+}
+
 function newBlock(op){
   const b = {id: idSeq++, op};
-  if (op === 'forward') b.sec = 3;
+  // 후진 블록 생성 시 기본 3초 세팅
+  if (op === 'forward' || op === 'backward') b.sec = 3; 
   if (op === 'wait') b.sec = 1;
   if (op === 'repeat'){ b.count = 2; b.children = []; }
   return b;
@@ -541,7 +566,8 @@ function renderBlock(b, parentList){
 
     const addRow = document.createElement('div');
     addRow.className = 'addToRepeat';
-    ['forward','turn_left','turn_right','buzzer','wait'].forEach(op=>{
+    // 반복 블록 안에 넣을 수 있는 버튼 목록에 'backward' 추가
+    ['forward','backward','turn_left','turn_right','buzzer','wait'].forEach(op=>{
       const m = OP_META[op];
       const btn = document.createElement('button');
       btn.textContent = m.emoji;
@@ -676,6 +702,11 @@ function handleRunState(s){
     clearHighlights(); setLocked(false); 
     const [emoji, text] = KID_REASONS[s.reason] || ['⚠️', s.reason || '멈췄어요'];
     showBanner(emoji, text, 3000);
+    
+    // 장애물을 감지하여 멈췄을 때 폰에서 경고음 재생
+    if (s.reason === '장애물 감지') {
+      playErrorSound();
+    }
   }
 }
 
