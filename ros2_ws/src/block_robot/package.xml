@@ -4,7 +4,7 @@
   <name>block_robot</name>
   <version>0.0.1</version>
   <description>block coding robot interpreter/ultrasonic/buzzer nodes</description>
-  <maintainer email="robot@example.com">robot</maintainer>
+  <maintainer email="kimamugae@amolang.com">robot</maintainer>
   <license>Apache-2.0</license>
 
   <depend>rclpy</depend>
