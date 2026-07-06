@@ -57,18 +57,32 @@
 ## 📂 프로젝트 구조
 
 ```text
-project-root/
-├── README.md
-├── PLAN.md
-├── INTERFACE.md
-├── DAILY_LOG.md
-├── TEST.md
-├── REPORT.md
-├── PROJECT_GUIDE.md
+project_root/
+├── README.md              # 프로젝트 소개 + 터틀봇 구동 및 웹앱 실행 방법
+├── PLAN.md                # Day 1: 프로젝트 계획서
+├── INTERFACE.md           # Day 1: 토픽 인터페이스 정의서 (/program, /run_state 등)
+├── DAILY_LOG.md           # Day 2~4: 일일 스탠드업 로그 (누적)
+├── TEST.md                # Day 3~4: 테스트 시나리오 및 결과 (주행 및 스피커 우회 테스트)
+├── REPORT.md              # Day 5: 최종 보고서 (KPT 포함)
+├── PROJECT_GUIDE.md       # 프로젝트 운영 가이드
+│
 ├── web/
+│   └── blocks.html        # 스크롤바 최적화 + 노트북 스피커 부저 연동형 블록코딩 웹앱
+│
 ├── ros2_ws/
-├── images/
-└── media/
+│   └── src/
+│       └── block_robot/   # 핵심 ROS 2 블록 제어 패키지
+│           ├── package.xml        # turtlebot3_msgs 의존성이 추가된 패키지 설정 파일
+│           ├── setup.py           # 노드 실행 파일 및 런치 엔트리포인트 등록 설정
+│           ├── setup.cfg
+│           └── block_robot/
+│               ├── __init__.py
+│               ├── interpreter_node.py # [핵심] JSON 순차 실행 및 모터/부저 제어 뇌 노드
+│               ├── buzzer_node.py      # /buzzer 토픽을 OpenCR 사운드로 중계하는 부저 노드
+│               └── ultrasonic_node.py  # HC-SR04 초음파 센서 값 발행 노드
+│
+├── images/                # 아키텍처 및 시스템 데이터 흐름 다이어그램 (상대 경로 참조)
+└── media/                 # 터틀봇 Burger 주행 및 웹앱 연동 시연 영상, 스크린샷
 ```
 
 ---
