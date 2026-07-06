@@ -202,7 +202,7 @@ Interpreter Node
    /obstacle_dist
             ▲
             │
- Ultrasonic Node
+  Lidar node (Ultrasonic Node)
 ```
 
 ---
