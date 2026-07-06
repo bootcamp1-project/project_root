@@ -33,10 +33,7 @@
         Web App (스마트폰/PC 브라우저)
           │
           ▼
-    rosbridge_server (WebSocket)
-          │
-          ▼
-   interpreter_node (핵심 뇌 노드)
+   interpreter_node (웹소켓 서버 내장, 핵심 뇌 노드)
       │        │
       │        ├── /buzzer
       │
@@ -120,7 +117,7 @@ ros2 launch turtlebot3_bringup robot.launch.py
 
 ### 3. 블록 코딩 통합 런치 파일 실행 (PC 터미널에서 실행)
 
-아래 명령어 하나로 rosbridge_server, interpreter_node, ultrasonic_node, buzzer_node, 그리고 웹 서버(포트 8000)가 동시에 실행됩니다.
+아래 명령어 하나로 interpreter_node, ultrasonic_node, buzzer_node, 그리고 웹 서버(포트 8000)가 동시에 실행됩니다. 웹 앱은 별도의 rosbridge 없이 interpreter_node에 내장된 웹소켓 서버를 통해 직접 통신합니다.
 
 ```bash
 ros2 launch block_robot bringup.launch.py
