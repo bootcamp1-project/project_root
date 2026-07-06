@@ -25,10 +25,7 @@
 Web App
     │
     ▼
-rosbridge_server
-    │
-    ▼
-interpreter_node
+interpreter_node (웹소켓 서버 내장)
     ├── /cmd_vel
     ├── /buzzer
     └── /run_state
@@ -69,26 +66,24 @@ project-root/
 
 ## 🚀 실행 방법
 
-### 1. rosbridge 실행
+### 1. 터틀봇 기본 노드 실행 (터틀봇 라즈베리파이에서 실행)
 
 ```bash
-ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+export TURTLEBOT3_MODEL=burger
+ros2 launch turtlebot3_bringup robot.launch.py
 ```
 
-### 2. ROS 노드 실행
+### 2. 블록 코딩 통합 노드 실행 (PC에서 실행)
 
 ```bash
-ros2 run robot_interpreter interpreter_node
+ros2 launch block_robot bringup.launch.py
 ```
 
-### 3. 웹 실행
+interpreter_node, ultrasonic_node, buzzer_node와 웹 서버가 함께 실행되며, 웹 앱은 별도의 rosbridge 없이 interpreter_node에 내장된 웹소켓 서버를 통해 직접 통신합니다.
 
-```bash
-cd web
-python3 -m http.server 8000
-```
+### 3. 웹앱 접속
 
-브라우저에서 아래 주소로 접속합니다.
+브라우저에서 아래 주소로 접속합니다. (실제 환경에 맞게 IP 변경)
 
 ```text
 http://localhost:8000
