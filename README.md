@@ -72,7 +72,7 @@ project_root/
 │           ├── package.xml        # turtlebot3_msgs 등 의존성이 추가된 패키지 설정 파일
 │           ├── setup.py           # 노드 실행 파일 및 런치 엔트리포인트 등록 설정
 │           ├── launch/
-│           │   └── bringup.launch.py # 웹서버, rosbridge, 핵심 노드를 한 번에 켜는 통합 런치 파일
+│           │   └── bringup.launch.py # interpreter_node, ultrasonic_node, buzzer_node를 한 번에 켜는 통합 런치 파일
 │           └── block_robot/
 │               ├── __init__.py
 │               ├── interpreter_node.py # [핵심] JSON 순차 실행 및 양방향 안전 정지 로직 포함
@@ -98,7 +98,8 @@ project_root/
 
 ## 🚀 실행 방법
 
-본 프로젝트는 편의성을 위해 통합 런치 파일을 제공합니다. 아래 과정을 통해 한 번에 전체 시스템을 구동할 수 있습니다.
+전체 시스템은 **① 터틀봇 하드웨어 노드 → ② ROS 2 통합 런치 파일 → ③ 웹 서버 → ④ 웹앱 접속**의 순서로 켜야 합니다.  
+`bringup.launch.py`는 ROS 2 노드(interpreter_node, ultrasonic_node, buzzer_node)만 실행하며, 웹 서버는 포함되어 있지 않으므로 아래 3번 단계에서 별도로 실행해야 합니다.
 
 ### 1. 패키지 빌드
 
@@ -117,13 +118,22 @@ ros2 launch turtlebot3_bringup robot.launch.py
 
 ### 3. 블록 코딩 통합 런치 파일 실행 (PC 터미널에서 실행)
 
-아래 명령어 하나로 interpreter_node, ultrasonic_node, buzzer_node, 그리고 웹 서버(포트 8000)가 동시에 실행됩니다. 웹 앱은 별도의 rosbridge 없이 interpreter_node에 내장된 웹소켓 서버를 통해 직접 통신합니다.
+아래 명령어로 interpreter_node, ultrasonic_node, buzzer_node가 동시에 실행됩니다.
 
 ```bash
 ros2 launch block_robot bringup.launch.py
 ```
 
-### 4. 웹앱 접속
+### 4. 웹 서버 실행 (PC의 새 터미널에서 실행)
+
+`web/` 디렉토리로 이동한 뒤, 아래 명령어로 웹 서버를 켭니다.
+
+```bash
+cd ~/ros2_ws/src/block_robot/web
+python3 -m http.server 8000
+```
+
+### 5. 웹앱 접속
 
 스마트폰 또는 노트북의 브라우저에서 아래 주소로 접속합니다. (실제 환경에 맞게 IP 변경)
 
