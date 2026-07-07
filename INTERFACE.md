@@ -1,268 +1,363 @@
-# 📡 ROS2 Topic Interface
+# 📡 INTERFACE.md
 
-> 블록 코딩 로봇 교육 플랫폼의 ROS 2 토픽 인터페이스 정의서
+# 블록 코딩 로봇 교육 플랫폼 인터페이스 명세서
 
----
-
-## 1. 시스템 개요
-
-웹 애플리케이션에서 중첩 조립한 블록 프로그램(JSON Tree)을 ROS 2로 전달하면, Interpreter Node가 이를 런타임에 실시간으로 해석하여 TurtleBot3를 제어한다.
-
-실행 상태는 실시간으로 웹으로 역전파되어 현재 구동 중인 블록을 직관적으로 표시한다. 라이다(LiDAR) 센서는 대각선 사각지대를 포함한 전/후방 90도 범위를 철벽 감시하며, 주행 중 장애물 발견 시 현재 블록을 즉시 탈출(Skip)하고 하위 조건 분기 블록으로 제어권을 부드럽게 이양한다.
+> ROS 2 Humble 기반 TurtleBot3 블록 코딩 교육 플랫폼의 통신 인터페이스 정의
 
 ---
 
-## 2. Topic Interface
+# 1. 문서 목적
 
-| Topic | Message Type | Publisher | Subscriber | Rate | Type | QoS |
-|--------|--------------|-----------|------------|------|------|------|
-| `/program` | `std_msgs/msg/String` | Web App | Interpreter Node | Event | Edge | RELIABLE |
-| `/run_stop` | `std_msgs/msg/Bool` | Web App | Interpreter Node | Event | Edge | RELIABLE |
-| `/run_state` | `std_msgs/msg/String` | Interpreter Node | Web App | Event | Edge | RELIABLE |
-| `/cmd_vel` | `geometry_msgs/msg/Twist` | Interpreter Node | TurtleBot3 | 10 Hz | Continuous | RELIABLE |
-| `/obstacle_dist/front` | `std_msgs/msg/Float32` | Ultrasonic Node (LiDAR) | Interpreter Node | 10 Hz | Continuous | RELIABLE |
-| `/obstacle_dist/rear` | `std_msgs/msg/Float32` | Ultrasonic Node (LiDAR) | Interpreter Node | 10 Hz | Continuous | RELIABLE |
-| `/buzzer` | `std_msgs/msg/Bool` | Interpreter Node | Buzzer Node | Event | Edge | RELIABLE |
+본 문서는 웹 애플리케이션과 ROS 2 노드 간의 데이터 교환 규격을 정의한다.
 
-> **호환성 노트:** LiDAR(LDS-03)의 360도 전방위 스캔 데이터를 전/후방 부채꼴 영역으로 가공하여 스캔하며, 시스템 호환성을 유지하기 위해 노드 파일명은 기존대로 `ultrasonic_node.py`를 유지한다.
+인터페이스를 표준화하여 프론트엔드와 ROS2 노드가 독립적으로 개발되더라도 동일한 프로토콜을 사용할 수 있도록 하는 것을 목표로 한다.
 
 ---
 
-## 3. Block Specification
+# 2. 시스템 구성
 
-웹에서는 블록을 중첩이 가능한 JSON 트리 구조 형태로 직렬화하여 전송한다.
+```text
+Web Browser
+      │
+      │ WebSocket
+      ▼
+rosbridge_server
+      │
+      ▼
+ROS2 Topics
+      │
+      ▼
+Interpreter Node
+      │
+ ┌────┼────┐
+ │    │    │
+ ▼    ▼    ▼
+cmd_vel
+run_state
+buzzer
 
-### Forward
-
-```json
-{
-  "op": "forward",
-  "sec": 3.0
-}
+      ▲
+      │
+obstacle_dist
+      ▲
+      │
+Ultrasonic Node
 ```
-
-지정한 시간(초) 동안 전진한다 (시간 미지정 시 기본 3.0초).
-
-### Backward
-
-```json
-{
-  "op": "backward",
-  "sec": 3.0
-}
-```
-
-지정한 시간(초) 동안 후진한다 (시간 미지정 시 기본 3.0초).
-
-### Turn Left
-
-```json
-{
-  "op": "turn_left"
-}
-```
-
-좌측으로 약 90° 회전한다. (제자리 회전 시간 상수 `TURN_90_SEC = 3.4`로 실제 구동 사양 보정 완료)
-
-### Turn Right
-
-```json
-{
-  "op": "turn_right"
-}
-```
-
-우측으로 약 90° 회전한다. (제자리 회전 시간 상수 `TURN_90_SEC = 3.4`로 실제 구동 사양 보정 완료)
-
-### Wait
-
-```json
-{
-  "op": "wait",
-  "sec": 1.0
-}
-```
-
-지정한 시간 동안 대기한다.
-
-### Buzzer
-
-```json
-{
-  "op": "buzzer"
-}
-```
-
-부저를 약 0.5초 동안 울린다.
-
-### Repeat (반복하기)
-
-```json
-{
-  "op": "repeat",
-  "count": 2,
-  "blocks": [
-    { "op": "forward", "sec": 3.0 }
-  ]
-}
-```
-
-내부에 중첩된 자식 블록들(`blocks`)을 지정한 횟수(`count`)만큼 실시간 루프로 반복 실행한다.
-
-### If (만약에)
-
-```json
-{
-  "op": "if",
-  "cond": "front_obstacle",
-  "then": [
-    { "op": "backward", "sec": 3.0 }
-  ]
-}
-```
-
-해당 블록 차례가 온 런타임 순간에 조건(`cond`)을 검사하여 참(장애물 거리 20cm 미만)일 경우 내부 자식 블록들(`then`)을 대기열에 주입하여 실행한다.
 
 ---
 
-## 4. Program Format (Nested Tree 구조)
+# 3. 통신 방식
 
-**[중요 변경]** 기존의 웹앱 단 선형 평탄화(Loop Unrolling) 전송 방식을 전면 무효화하고, 스크래치 고유의 실시간 논리 제어를 위해 중첩 트리(Nested JSON Tree) 형태로 프로그램을 전송한다.
+웹과 ROS2는 **rosbridge_server(WebSocket)** 를 이용하여 통신한다.
+
+### Web → ROS2
+
+프로그램 실행 명령
+
+JSON Tree
+
+↓
+
+`/program`
+
+↓
+
+Interpreter Node
+
+---
+
+### ROS2 → Web
+
+현재 실행 중인 블록
+
+↓
+
+`/run_state`
+
+↓
+
+Web Highlight
+
+---
+
+# 4. Topic 목록
+
+| Topic | Type | Publisher | Subscriber | 설명 |
+|--------|------|-----------|------------|------|
+| /program | std_msgs/String | Web | Interpreter | 블록 프로그램(JSON) |
+| /cmd_vel | geometry_msgs/Twist | Interpreter | TurtleBot3 | 이동 명령 |
+| /run_state | std_msgs/String | Interpreter | Web | 현재 실행 블록 |
+| /buzzer | std_msgs/Int32 | Interpreter | Buzzer Node | 부저 제어 |
+| /scan | sensor_msgs/LaserScan | TurtleBot3 | Ultrasonic Node | LiDAR 원본 데이터 |
+| /obstacle_dist/front | std_msgs/Float32 | Ultrasonic | Interpreter | 전방 거리 |
+| /obstacle_dist/rear | std_msgs/Float32 | Ultrasonic | Interpreter | 후방 거리 |
+
+---
+
+# 5. 데이터 흐름
+
+```text
+Web
+
+↓
+
+JSON Tree 생성
+
+↓
+
+rosbridge_server
+
+↓
+
+/program
+
+↓
+
+Interpreter
+
+↓
+
+cmd_vel
+
+↓
+
+TurtleBot3
+```
+
+실행 상태는 다음과 같이 역방향으로 전달된다.
+
+```text
+Interpreter
+
+↓
+
+/run_state
+
+↓
+
+rosbridge_server
+
+↓
+
+Web
+
+↓
+
+현재 블록 Highlight
+```
+
+---
+
+# 6. 프로그램(JSON) 구조
+
+Interpreter는 프로그램을 JSON Tree 형태로 입력받는다.
+
+예시
 
 ```json
 [
   {
-    "op": "repeat",
-    "count": 2,
-    "blocks": [
-      {
-        "op": "if",
-        "cond": "front_obstacle",
-        "then": [
-          { "op": "backward", "sec": 3.0 }
-        ]
-      },
-      {
-        "op": "forward",
-        "sec": 3.0
-      }
-    ]
+    "op":"forward",
+    "time":2
+  },
+  {
+    "op":"left",
+    "time":1
   }
 ]
 ```
 
-Interpreter Node는 이 트리를 기억하고 있다가, 주행 중에 실시간 한 단계씩 스택 구조로 깨서 해석(Runtime Parsing)을 수행한다.
+---
+
+반복문 예시
+
+```json
+{
+  "op":"repeat",
+  "count":3,
+  "children":[
+      {
+          "op":"forward",
+          "time":1
+      }
+  ]
+}
+```
 
 ---
 
-## 5. Run State Format
-
-Interpreter Node는 현재 실행 상태를 JSON 문자열로 웹에 실시간 송신한다. 웹앱은 이 토픽을 다이렉트로 매핑하여 시각적인 블록 반짝임 동기화(하이라이트)를 구현한다.
-
-### 실행 시작
+조건문 예시
 
 ```json
 {
-  "state": "running",
-  "total": 5
+  "op":"if_front",
+  "children":[
+      {
+          "op":"right"
+      }
+  ]
 }
 ```
 
-### 블록 실행 중
+---
+
+중첩 구조 예시
 
 ```json
 {
-  "state": "block",
-  "op": "forward",
-  "left": 4
+    "op":"repeat",
+    "count":2,
+    "children":[
+        {
+            "op":"forward"
+        },
+        {
+            "op":"if_front",
+            "children":[
+                {
+                    "op":"right"
+                }
+            ]
+        }
+    ]
 }
 ```
 
-| 항목 | 설명 |
+---
+
+# 7. 실행 상태(run_state)
+
+Interpreter는 현재 실행 중인 블록을 Web으로 전달한다.
+
+예시
+
+```json
+{
+    "op":"forward"
+}
+```
+
+또는
+
+```json
+{
+    "op":"left"
+}
+```
+
+웹에서는 전달받은 op를 이용하여 해당 블록을 Highlight한다.
+
+---
+
+# 8. 명령(Operation) 정의
+
+| op | 설명 |
+|----|------|
+| forward | 전진 |
+| backward | 후진 |
+| left | 좌회전 |
+| right | 우회전 |
+| wait | 대기 |
+| buzzer | 부저 |
+| repeat | 반복문 |
+| if_front | 전방 조건 |
+| if_rear | 후방 조건 |
+
+---
+
+# 9. Runtime Interpreter 동작
+
+Interpreter는 프로그램을 미리 펼치지 않는다.
+
+Tree 구조를 Runtime에 직접 해석한다.
+
+실행 순서는 다음과 같다.
+
+```text
+Stack Push
+
+↓
+
+현재 Node 실행
+
+↓
+
+Children 존재 여부 확인
+
+↓
+
+Stack Push
+
+↓
+
+다음 Node 실행
+
+↓
+
+Stack Empty
+
+↓
+
+종료
+```
+
+이를 통해 반복문과 조건문의 중첩 구조를 지원한다.
+
+---
+
+# 10. 장애물 감지
+
+Interpreter는 `/obstacle_dist/front`와 `/obstacle_dist/rear` Topic을 구독한다.
+
+임계 거리 이내로 장애물이 감지되면
+
+```
+현재 이동 블록 종료
+
+↓
+
+속도 0 전송
+
+↓
+
+다음 블록 실행
+```
+
+과정을 수행한다.
+
+---
+
+# 11. 예외 처리
+
+| 상황 | 처리 |
 |------|------|
-| `state` | 현재 상태 |
-| `op` | 현재 하드웨어가 실제로 수행 중인 동작 연산자 |
-| `left` | 대기열에 남은 잔여 블록 개수 |
-
-### 실행 완료
-
-```json
-{
-  "state": "done"
-}
-```
-
-### 실행 중단 (치명적 예외 상황 발생 시)
-
-```json
-{
-  "state": "aborted",
-  "reason": "사용자 중지"
-}
-```
-
-> **주의:** 주행 중 벽 발견 시에는 전체 중단(`aborted`) 대신 아래의 안전 정책에 의거해 실시간 탈출 분기를 탑재함.
+| 잘못된 JSON | 프로그램 실행 중단 |
+| WebSocket 종료 | 프로그램 종료 |
+| Emergency Stop | cmd_vel = 0 |
+| 장애물 감지 | Runtime Skip |
+| 빈 프로그램 | 실행하지 않음 |
 
 ---
 
-## 6. Data Flow
+# 12. 인터페이스 규칙
 
-```
-      Web App (JSON 트리 빌드 및 UI 동적 매핑)
-           │
-           │  /program (중첩 Tree)
-           ▼
-     Interpreter Node (실시간 런타임 스택 제어 엔진)
-           │
-           ├──────────────▶ /cmd_vel (바퀴 모터 구동)
-           │
-           ├──────────────▶ /buzzer (멜로디 제어)
-           │
-           └──────────────▶ /run_state (현재 실행 op 다이렉트 전송)
-                 ▲
-                 │ /obstacle_dist/front, /obstacle_dist/rear
-                 │ (90도 부채꼴 스캔 최적 거리 데이터)
-                 │
-      Lidar Node (ultrasonic_node.py) [사각지대 제로 패치 완료]
-```
+- 모든 프로그램은 JSON Tree 형태로 전송한다.
+- Web과 ROS2는 rosbridge_server를 통해 연결한다.
+- 실행 상태는 `/run_state` Topic으로 전달한다.
+- Interpreter는 Runtime에 Tree를 해석한다.
+- 장애물 감지는 LiDAR 데이터를 기반으로 수행한다.
+- Emergency Stop은 언제든 프로그램 실행을 중단할 수 있어야 한다.
 
 ---
 
-## 7. Safety Policy
+# 13. 인터페이스 변경 이력
 
-### 주행 중 실시간 조건 탈출 (Runtime Skip & Branch)
-
-- **실시간 도중하차:** `forward`(전진) 또는 `backward`(후진) 블록 실행 도중, 해당 진행 방향의 부채꼴 감시 범위 내에서 거리 임계값(20cm) 이하가 감지되면 전체 프로그램을 강제 강등시키는 대신 현재 주행 블록만 즉시 탈출(Skip) 처리한다.
-- **제어권 부드러운 이양:** 전진 블록이 스킵(`self.cur = None`)되면 다음 틱에서 대기열 하단에 위치한 [만약에] 블록이 즉시 깨어나게 되며, 실시간 센서 조건이 참이 되므로 내부에 조립된 피하기(후진, 회전 등) 시퀀스가 자연스럽게 이어지도록 설계되었다.
-
-### 대각선 사각지대(Blind Spot) 방어 정책
-
-- **부채꼴 스캔망 전개:** 기존의 일직선(10°) 스캔에서 정면(0°) 및 후면(180°) 기준 좌우 45°씩 총 90°의 광폭 부채꼴 방어막 영역을 설정함.
-- **사각지대 소멸:** 로봇이 경사지게 진입하거나 회전 반경 내에 벽이 대각선으로 걸릴 때 발생하는 물리 충돌 결함을 원천 차단하고, 감시 영역 내 최단 거리를 추출하여 실시간 연동한다.
-
-### 오작동 및 긴급 정지 이중 방어
-
-- **초기 간섭 차단 Latch:** 새로운 블록이 트리에서 막 해석되어 인가되는 첫 0.1초의 비동기 주기 동안, 센서 토픽의 미세 노이즈나 타이밍 비싱크로 긴급 제동 시퀀스가 오작동하는 현상을 `just_changed` 플래그로 완벽하게 래치(Latch) 차단 유예한다.
-- **웹-로봇 이중 잠금:** 프로그램이 실행 중일 때는 웹 단의 전체 편집 UI가 락(Lock) 상태가 되어 조작이 차단되고, 로봇 단에서도 실행 상태일 때 유입되는 신규 `/program` 토픽은 내부적으로 완전 무시(Drop) 처리하여 시스템 꼬임을 상호 방어한다.
+| 버전 | 내용 |
+|------|------|
+| v1.0 | 기본 Topic 정의 |
+| v1.1 | JSON Tree 구조 추가 |
+| v1.2 | Runtime Interpreter 명세 추가 |
+| v1.3 | Runtime Skip 및 장애물 처리 명세 추가 |
+| v1.4 | 최종 인터페이스 문서 정리 |
 
 ---
-
-## 8. QoS Policy
-
-| Topic | QoS |
-|-------|-----|
-| `/program` | RELIABLE |
-| `/run_stop` | RELIABLE |
-| `/run_state` | RELIABLE |
-| `/cmd_vel` | RELIABLE |
-| `/obstacle_dist/front` | RELIABLE |
-| `/obstacle_dist/rear` | RELIABLE |
-| `/buzzer` | RELIABLE |
-
----
-
-## 9. Interface Version
-
-- **Version:** 1.2
-- **Last Update:** Day 5 (중첩 JSON 트리 인터프리터 탑재, 주행 중 실시간 블록 탈출 및 제어 이양 메커니즘, 라이다 90도 사각지대 제로 패치 전면 반영)
-- **Status:** Final Approved
