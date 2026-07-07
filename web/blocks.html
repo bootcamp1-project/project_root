@@ -7,21 +7,30 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --sky-top:#BFE8FF;
-    --sky-bot:#FFF6E0;
-    --ink:#2E3350;
-    --card:#FFFFFF;
-    --forward:#3FB27F;
-    --backward:#FF70B8;
-    --turn:#4C8DFF;
-    --buzzer:#FFC93C;
-    --wait:#A784FF;
-    --repeat:#FF7A59;
-    --if-cls:#FF4B4B;
-    --danger:#FF4B4B;
+  :root {
+    --sky-top: #BFE8FF;
+    --sky-bot: #FFF6E0;
+    --ink: #2E3350;
+    --card: #FFFFFF;
+    --forward: #3FB27F;
+    --backward: #FF70B8;
+    --turn: #4C8DFF;
+    --buzzer: #FFC93C;
+    --wait: #A784FF;
+    --repeat: #FF7A59;
+    --if-cls: #FF4B4B;
+    --danger: #FF4B4B;
     --shadow: 0 6px 0 rgba(0,0,0,0.12);
   }
+
+  /* 다크모드 테마 변수 */
+  body.dark-mode {
+    --sky-top: #1a1a2e;
+    --sky-bot: #16213e;
+    --ink: #f5f6fa;
+    --card: rgba(30, 30, 46, 0.85);
+  }
+
   *{box-sizing:border-box;}
   html,body{height:100%;}
   body{
@@ -36,6 +45,7 @@
     -webkit-tap-highlight-color: transparent;
     user-select:none;
     overflow: hidden;
+    transition: background 0.3s ease;
   }
   h1,h2,.title-font{font-family:'Jua',sans-serif;}
 
@@ -59,8 +69,10 @@
     background:#fff;
     box-shadow:var(--shadow);
   }
-  #connState.ok{background:#DFFFEA;}
-  #connState.bad{background:#FFE3E3;}
+  #connState.ok{background:#DFFFEA; color:#2E3350;}
+  #connState.bad{background:#FFE3E3; color:#2E3350;}
+  
+  body.dark-mode #connState { background: #333; color: #fff; }
 
   #connectPanel{
     display:flex; gap:8px; align-items:center;
@@ -70,13 +82,18 @@
     font-size:14px;
     flex-wrap:wrap;
     flex-shrink: 0;
+    transition: background 0.3s ease;
   }
+  body.dark-mode #connectPanel { background: rgba(30, 30, 46, 0.75); }
+  
   #connectPanel input{
     flex:1; min-width:140px;
     padding:8px 10px; border-radius:10px;
     border:1px solid #cfd6e6;
     font-size:14px;
   }
+  body.dark-mode #connectPanel input { background: #2a2a3b; color: #fff; border-color: #444; }
+
   #connectPanel button{
     padding:8px 14px; border-radius:10px; border:none;
     background:var(--turn); color:#fff; cursor:pointer;
@@ -104,7 +121,10 @@
     padding:12px;
     border-radius:20px;
     flex-shrink: 0;
+    transition: all 0.3s ease;
   }
+  body.dark-mode #palette { background: rgba(30, 30, 46, 0.75); }
+
   .paletteBtn{
     min-height:72px;
     border:none;
@@ -140,8 +160,11 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: background 0.3s ease;
   }
-  #programArea h2{margin:0 0 10px 4px; font-size:18px; flex-shrink: 0;}
+  body.dark-mode #programArea { background: rgba(30, 30, 46, 0.75); }
+  
+  #programArea h2{margin:0; font-size:18px; flex-shrink: 0;}
   
   #programList{
     list-style:none;
@@ -154,6 +177,7 @@
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     padding-right: 4px;
+    min-height: 100px; /* 빈 리스트에도 드롭 가능하도록 공간 확보 */
   }
 
   #programList::-webkit-scrollbar { width: 6px; }
@@ -166,6 +190,7 @@
     color:#8891B0;
     padding:24px 8px;
     font-size:16px;
+    pointer-events: none; /* 드래그 이벤트 방해 방지 */
   }
 
   .block{
@@ -180,6 +205,7 @@
     cursor:grab;
     position:relative;
     flex-shrink: 0;
+    transition: margin 0.2s ease;
   }
   .block.dragging{opacity:.4;}
   .block .emoji{font-size:26px; flex-shrink:0;}
@@ -196,6 +222,7 @@
     background:rgba(255,255,255,0.9);
     font-size:18px; font-weight:bold;
     cursor:pointer;
+    color: #2E3350;
   }
   .block .stepper .val{min-width:34px; text-align:center; font-size:16px;}
   .block .delBtn{
@@ -218,13 +245,25 @@
   .repeatChildren{
     width:100%;
     margin-top:8px;
-    padding:8px;
+    padding:12px 8px 8px;
     border-radius:12px;
     background:rgba(255,255,255,0.2);
     display:flex;
     flex-direction:column;
     gap:8px;
+    transition: background 0.2s, outline 0.2s;
+    min-height: 60px; /* 비어있어도 드롭존으로 활용되게 공간 확보 */
   }
+  
+  /* 드래그 앤 드롭 하이라이트 영역 */
+  .repeatChildren.drag-over {
+    background: rgba(255, 255, 255, 0.5);
+    outline: 3px dashed rgba(255, 255, 255, 0.9);
+  }
+  
+  body.dark-mode .repeatChildren { background:rgba(0,0,0,0.3); }
+  body.dark-mode .repeatChildren.drag-over { background:rgba(0,0,0,0.6); outline: 3px dashed #fff; }
+
   .repeatChildren .block{box-shadow:none; min-height:50px;}
   .addToRepeat{
     display:flex; gap:6px; flex-wrap:wrap; width:100%;
@@ -273,6 +312,8 @@
     background:linear-gradient(180deg, rgba(255,246,224,0) 0%, rgba(255,246,224,0.95) 30%);
     z-index:10;
   }
+  body.dark-mode footer { background:linear-gradient(180deg, rgba(22,33,62,0) 0%, rgba(22,33,62,0.95) 30%); }
+
   #stopBtn, #runBtn{
     border:none;
     border-radius:50%;
@@ -312,6 +353,7 @@
     max-width:88vw;
     z-index:20;
     transition:transform .25s ease;
+    color: #2E3350;
   }
   #banner.show{transform:translateX(-50%) translateY(0);}
   #banner .big{font-size:40px; display:block; margin-bottom:6px;}
@@ -394,13 +436,19 @@
 
 <header>
   <h1>🤖 로봇 블록 놀이터</h1>
-  <span id="connState" class="bad">연결 안 됨</span>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <button id="darkModeBtn" style="border:none; background:#fff; width:34px; height:34px; border-radius:50%; box-shadow:var(--shadow); cursor:pointer; font-size:16px;">🌙</button>
+    <span id="connState" class="bad">연결 안 됨</span>
+  </div>
 </header>
 
 <div id="connectPanel">
   <input id="wsUrl" placeholder="ws://로봇주소:9090" value="ws://192.168.0.15:9090">
   <button id="connectBtn">연결하기</button>
   <button id="simToggle">🧪 연습 모드</button>
+  <button id="exportBtn" style="background:#5b4b9c;">📥 내보내기</button>
+  <button id="importBtn" style="background:#5b4b9c;">📤 불러오기</button>
+  <input type="file" id="fileInput" accept=".json" style="display:none;">
 </div>
 
 <main>
@@ -416,9 +464,15 @@
   </section>
 
   <section id="programArea">
-    <h2>나의 프로그램</h2>
-    <ul id="programList"></ul>
-    <p id="emptyHint">위에서 블록을 눌러 여기에 순서대로 쌓아보세요!</p>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-shrink:0;">
+      <h2>나의 프로그램</h2>
+      <button id="togglePaletteBtn" style="border:none; background:rgba(0,0,0,0.08); padding:6px 12px; border-radius:12px; cursor:pointer; font-family:'Jua',sans-serif; color:var(--ink);">◀ 팔레트 숨기기</button>
+    </div>
+    
+    <ul id="programList">
+      <p id="emptyHint">위에서 블록을 눌러 여기에 순서대로 쌓아보세요!</p>
+    </ul>
+    
   </section>
 </main>
 
@@ -436,6 +490,7 @@ let running = false;
 let simMode = false;
 let ros = null;
 let progTopic = null, stopTopic = null, stateTopic = null;
+let dragSrcId = null; // 드래그 앤 드롭 소스 ID
 
 const listEl = document.getElementById('programList');
 const emptyHint = document.getElementById('emptyHint');
@@ -455,6 +510,64 @@ const OP_META = {
   repeat:   {emoji:'🔁', label:'반복하기', cls:'repeat', hasCount:true},
   if:       {emoji:'❓', label:'만약 앞 장애물 발견하면', cls:'if'}
 };
+
+// -----------------------------------------------------
+// 신규 추가: 중첩 드래그 앤 드롭을 위한 데이터 헬퍼 함수
+// -----------------------------------------------------
+
+// 1. 특정 블록을 찾아서 배열에서 뽑아내는 함수 (이동 시 기존 위치에서 제거용)
+function extractBlock(id, list = program) {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].id === id) return list.splice(i, 1)[0];
+    if (list[i].children) {
+      const found = extractBlock(id, list[i].children);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+// 2. 특정 블록 객체 찾기
+function findBlock(id, list = program) {
+  for (const b of list) {
+    if (b.id === id) return b;
+    if (b.children) {
+      const found = findBlock(id, b.children);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+// 3. 특정 블록의 부모 리스트(배열)와 인덱스를 반환 (그 블록 위로 삽입할 때 사용)
+function findParentListAndIndex(targetId, list = program) {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].id === targetId) return { list, index: i };
+    if (list[i].children) {
+      const res = findParentListAndIndex(targetId, list[i].children);
+      if (res) return res;
+    }
+  }
+  return null;
+}
+
+// 4. "내가 내 자식(루프) 안으로 들어가는가?" 체크 (무한 에러 방지)
+function isDescendant(parentId, targetId) {
+  const parent = findBlock(parentId);
+  if (!parent) return false;
+  if (parent.id === targetId) return true;
+  
+  function check(node) {
+    if (node.id === targetId) return true;
+    if (node.children) {
+      for (const c of node.children) {
+        if (check(c)) return true;
+      }
+    }
+    return false;
+  }
+  return check(parent);
+}
 
 function playLaptopBuzzer() {
   try {
@@ -519,12 +632,19 @@ function removeBlock(id, list=program){
 }
 
 function render(){
+  // 기존 리스트 비우고 힌트(가이드 텍스트)만 복구
   listEl.innerHTML = '';
-  emptyHint.style.display = program.length ? 'none' : 'block';
-  program.forEach(b => listEl.appendChild(renderBlock(b, program)));
+  listEl.appendChild(emptyHint);
+  
+  if(program.length > 0) {
+    emptyHint.style.display = 'none';
+    program.forEach(b => listEl.appendChild(renderBlock(b)));
+  } else {
+    emptyHint.style.display = 'block';
+  }
 }
 
-function renderBlock(b, parentList){
+function renderBlock(b){
   const meta = OP_META[b.op];
   const li = document.createElement('li');
   li.className = `block b-${meta.cls}`;
@@ -550,7 +670,7 @@ function renderBlock(b, parentList){
   if (b.op === 'repeat' || b.op === 'if'){
     const childWrap = document.createElement('div');
     childWrap.className = 'repeatChildren';
-    b.children.forEach(cb => childWrap.appendChild(renderBlock(cb, b.children)));
+    b.children.forEach(cb => childWrap.appendChild(renderBlock(cb)));
 
     const addRow = document.createElement('div');
     addRow.className = 'addToRepeat';
@@ -558,34 +678,108 @@ function renderBlock(b, parentList){
       const m = OP_META[op];
       const btn = document.createElement('button');
       btn.textContent = m.emoji;
-      btn.onclick = ()=>{ b.children.push(newBlock(op)); render(); };
+      btn.onclick = (e)=>{ e.stopPropagation(); b.children.push(newBlock(op)); render(); };
       addRow.appendChild(btn);
     });
     childWrap.appendChild(addRow);
     li.appendChild(childWrap);
+
+    // [중첩 영역에 드롭 설정]
+    childWrap.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation(); // 부모 블럭으로 이벤트가 번지지 않게 함
+      if (!running && dragSrcId !== null && dragSrcId !== b.id && !isDescendant(dragSrcId, b.id)) {
+        childWrap.classList.add('drag-over');
+      }
+    });
+    
+    childWrap.addEventListener('dragleave', (e) => {
+      e.stopPropagation();
+      childWrap.classList.remove('drag-over');
+    });
+
+    childWrap.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      childWrap.classList.remove('drag-over');
+      
+      if (running || dragSrcId == null || dragSrcId === b.id) return;
+      if (isDescendant(dragSrcId, b.id)) {
+          showBanner('⚠️', '블록을 자신 안에 넣을 수 없어요!', 1500);
+          return;
+      }
+
+      const draggedBlock = extractBlock(dragSrcId);
+      if (draggedBlock) {
+          b.children.push(draggedBlock); // 현재 루프 블록의 맨 끝에 삽입
+          render();
+      }
+      dragSrcId = null;
+    });
   }
 
-  li.addEventListener('dragstart', ()=>{ if(running) return; li.classList.add('dragging'); dragSrcId = b.id; });
-  li.addEventListener('dragend', ()=> li.classList.remove('dragging'));
-  li.addEventListener('dragover', (e)=>{ e.preventDefault(); });
+  // [블럭 자체에 드롭 설정 (블럭 사이에 끼워넣기)]
+  li.addEventListener('dragstart', (e)=>{ 
+    if(running) { e.preventDefault(); return; }
+    e.stopPropagation();
+    li.classList.add('dragging'); 
+    dragSrcId = b.id; 
+  });
+  
+  li.addEventListener('dragend', (e)=> {
+    e.stopPropagation();
+    li.classList.remove('dragging');
+    dragSrcId = null;
+  });
+  
+  li.addEventListener('dragover', (e)=>{ 
+    e.preventDefault(); 
+    e.stopPropagation();
+  });
+  
   li.addEventListener('drop', (e)=>{
     e.preventDefault();
-    if (running || dragSrcId==null) return;
-    reorder(dragSrcId, b.id, parentList);
+    e.stopPropagation();
+    if (running || dragSrcId == null || dragSrcId === b.id) return;
+    
+    // 블럭을 자신 내부의 하위 블럭 위로 떨어뜨릴 때의 무한 루프 방지
+    if (isDescendant(dragSrcId, b.id)) {
+        showBanner('⚠️', '블록을 자신 안에 넣을 수 없어요!', 1500);
+        return;
+    }
+
+    const draggedBlock = extractBlock(dragSrcId);
+    if (draggedBlock) {
+        const targetInfo = findParentListAndIndex(b.id);
+        if (targetInfo) {
+            // 내가 드롭한 블럭 "바로 위"에 쏙 끼워넣기
+            targetInfo.list.splice(targetInfo.index, 0, draggedBlock);
+        } else {
+            program.push(draggedBlock);
+        }
+        render();
+    }
+    dragSrcId = null;
   });
 
   return li;
 }
 
-let dragSrcId = null;
-function reorder(srcId, targetId, list){
-  const srcIdx = list.findIndex(x=>x.id===srcId);
-  const tgtIdx = list.findIndex(x=>x.id===targetId);
-  if (srcIdx<0 || tgtIdx<0 || srcIdx===tgtIdx) return;
-  const [item] = list.splice(srcIdx,1);
-  list.splice(tgtIdx,0,item);
-  render();
-}
+// 메인 빈 화면 영역(바탕)에 떨어뜨렸을 때 최상위 리스트 맨 끝으로 보내는 로직
+listEl.addEventListener('dragover', (e) => {
+  e.preventDefault();
+});
+listEl.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (running || dragSrcId == null) return;
+  
+  const draggedBlock = extractBlock(dragSrcId);
+  if (draggedBlock) {
+      program.push(draggedBlock); // 메인 프로그램 리스트 끝에 추가
+      render();
+  }
+  dragSrcId = null;
+});
 
 function makeStepper(value, step, min, max, onChange, suffix=''){
   const wrap = document.createElement('div'); wrap.className = 'stepper';
@@ -649,15 +843,11 @@ function showBanner(emoji, text, ms=2200){
 
 const KID_REASONS = { '장애물 감지': ['🙈', '앞에 뭔가 있어요!'], '사용자 중지': ['✋', '멈췄어요!'] };
 
-// [핵심 버그 수정] 실시간 주행 탈출 시 UI 하이라이트가 꼬이지 않도록 
-// 로봇이 보내주는 현재 op 연산자 자체와 매칭되는 실제 화면의 블록을 찾아서 반짝이게 만듭니다.
 function highlightActiveBlock(op) {
   clearHighlights();
   if (!op) return;
-  // 프로그램 내에서 현재 매칭되는 연산자를 가진 첫 번째 활성 블록을 탐색
   const blocks = document.querySelectorAll(`.block.b-${op}`);
   if (blocks.length > 0) {
-    // 이미 락이 걸린 주행 상태이므로 첫 번째 혹은 적절한 노드에 하이라이트 인가
     blocks[0].classList.add('running');
   }
 }
@@ -666,7 +856,6 @@ function handleRunState(s){
   if (s.state === 'running'){
     setLocked(true);
   } else if (s.state === 'block'){
-    // 인덱스 맵 기반 대신, 로봇이 주는 연산자 명을 기반으로 다이렉트 하이라이트를 주어 꼬임을 완전히 방지합니다.
     highlightActiveBlock(s.op);
     if (s.op === 'buzzer') { playLaptopBuzzer(); }
   } else if (s.state === 'done'){
@@ -749,6 +938,7 @@ document.getElementById('connectBtn').addEventListener('click', ()=>{
   connectRos(url);
 });
 
+let reconnectTimer;
 function connectRos(url){
   if (ros) { try{ ros.close(); }catch(e){} }
   ros = new ROSLIB.Ros({ url });
@@ -763,8 +953,123 @@ function connectRos(url){
     });
   });
   ros.on('error', ()=>{ connStateEl.textContent = '연결 오류'; connStateEl.className = 'bad'; });
-  ros.on('close', ()=>{ connStateEl.textContent = '연결 끊김'; connStateEl.className = 'bad'; });
+  ros.on('close', ()=>{ 
+    connStateEl.textContent = '재연결 중...'; connStateEl.className = 'bad'; 
+    clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(() => { if (!simMode) connectRos(url); }, 3000);
+  });
 }
+
+// -----------------------------------------------------
+// 신규 추가 기능 (UI 겹침 방지 및 완벽 통합)
+// -----------------------------------------------------
+
+const darkModeBtn = document.getElementById('darkModeBtn');
+darkModeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  darkModeBtn.textContent = isDark ? '☀️' : '🌙';
+  darkModeBtn.style.background = isDark ? '#333' : '#fff';
+  showBanner(isDark ? '🌙' : '☀️', isDark ? '다크 모드!' : '라이트 모드!', 1500);
+});
+
+const paletteEl = document.getElementById('palette');
+const togglePaletteBtn = document.getElementById('togglePaletteBtn');
+let paletteVisible = true;
+togglePaletteBtn.addEventListener('click', () => {
+  paletteVisible = !paletteVisible;
+  paletteEl.style.display = paletteVisible ? 'grid' : 'none';
+  togglePaletteBtn.textContent = paletteVisible ? '◀ 팔레트 숨기기' : '▶ 팔레트 보이기';
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  if(program.length === 0) { showBanner('⚠️', '저장할 블록이 없습니다.', 1500); return; }
+  const data = JSON.stringify(serializeProgram(program), null, 2);
+  const blob = new Blob([data], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'robot_program.json';
+  a.click();
+  showBanner('📥', '파일로 저장되었습니다!', 1500);
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('fileInput').click();
+});
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      function rebuild(list) {
+        return list.map(b => {
+          const nb = newBlock(b.op);
+          if (b.sec !== undefined) nb.sec = b.sec;
+          if (b.count !== undefined) nb.count = b.count;
+          if (b.blocks) nb.children = rebuild(b.blocks);
+          if (b.then) nb.children = rebuild(b.then);
+          return nb;
+        });
+      }
+      program = rebuild(parsed);
+      render();
+      showBanner('📤', '프로그램을 불러왔습니다!', 1500);
+    } catch(err) {
+      showBanner('❌', '파일 형식이 잘못되었습니다.', 2000);
+    }
+    e.target.value = ''; 
+  };
+  reader.readAsText(file);
+});
+
+// 브라우저 로컬 저장소 자동저장 (Debounce 적용)
+let saveTimer;
+const oldRender = render;
+render = function() {
+  oldRender();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    localStorage.setItem('robot_blocks', JSON.stringify(serializeProgram(program)));
+  }, 500); 
+};
+
+// 시작 시 자동 로드
+window.addEventListener('load', () => {
+  const data = localStorage.getItem('robot_blocks');
+  if (data) {
+    try {
+      const parsed = JSON.parse(data);
+      function rebuild(list) {
+        return list.map(b => {
+          const nb = newBlock(b.op);
+          if (b.sec !== undefined) nb.sec = b.sec;
+          if (b.count !== undefined) nb.count = b.count;
+          if (b.blocks) nb.children = rebuild(b.blocks);
+          if (b.then) nb.children = rebuild(b.then);
+          return nb;
+        });
+      }
+      program = rebuild(parsed);
+      oldRender(); 
+    } catch(e) {}
+  }
+});
+
+// PWA 모바일 설치 지원
+const manifest = {
+  name: "로봇 블록 놀이터", short_name: "로봇블록", start_url: ".", display: "standalone",
+  background_color: "#BFE8FF", theme_color: "#4C8DFF",
+  icons: [{ src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSI4MCIgZm9udC1zaXplPSI4MCI+8J+krjwvdGV4dD48L3N2Zz4=", sizes: "192x192", type: "image/svg+xml" }]
+};
+const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+const linkTag = document.createElement('link'); 
+linkTag.rel = 'manifest'; 
+linkTag.href = URL.createObjectURL(manifestBlob);
+document.head.appendChild(linkTag);
+
+// 최초 렌더링
 render();
 </script>
 </body>
