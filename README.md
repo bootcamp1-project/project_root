@@ -297,7 +297,7 @@ project_root/
 │
 ├── images/
 │   ├── block_robot_architecture.png
-│   ├── rosgraph_update.png 
+│   └── rosgraph_update.png 
 │
 └── media/
     └── 블록코딩시연영.mp4
