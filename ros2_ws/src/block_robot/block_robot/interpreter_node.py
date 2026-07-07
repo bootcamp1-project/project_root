@@ -7,7 +7,7 @@ from std_msgs.msg import String, Bool, Float32
 from geometry_msgs.msg import Twist
 
 OBSTACLE_M = 0.20      # 장애물 제한 거리 (20cm)
-TURN_90_SEC = 3.4      # 90도 회전 시간
+TURN_90_SEC = 3.2      # 90도 회전 시간
 LINEAR_SPEED = 0.10    # 전진/후진 속도 (m/s)
 ANGULAR_SPEED = 0.5    # 회전 속도 (rad/s)
 
