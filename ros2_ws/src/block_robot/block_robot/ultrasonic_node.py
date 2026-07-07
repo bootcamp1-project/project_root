@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ultrasonic_node: 라이다(LDS-03)로 전방/후방 거리 동시 측정"""
+"""ultrasonic_node: 라이다(LDS-03) 사각지대 제거 버전 (전/후방 각각 90도 부채꼴 감시)"""
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
@@ -10,7 +10,6 @@ class UltrasonicNode(Node):
     def __init__(self):
         super().__init__('ultrasonic_node')
         
-        # 전방과 후방 거리를 각각 발행할 2개의 퍼블리셔 생성
         self.pub_front = self.create_publisher(Float32, '/obstacle_dist/front', 10)
         self.pub_rear = self.create_publisher(Float32, '/obstacle_dist/rear', 10)
 
@@ -26,24 +25,26 @@ class UltrasonicNode(Node):
             self.scan_callback,
             qos_profile
         )
-        self.get_logger().info('🚀 [전/후방 감시] 라이다 센서가 앞뒤를 모두 감시합니다!')
+        self.get_logger().info('🚀 [사각지대 제로 패치] 앞/뒤 좌우 45도 대각선 영역까지 모두 감시합니다!')
 
     def scan_callback(self, msg):
         if not msg.ranges:
             return
 
-        # 정면 (0도 기준 좌우 5도)
-        front_ranges = msg.ranges[0:5] + msg.ranges[355:360]
-        # 후방 (180도 기준 좌우 5도 -> 175도 ~ 185도)
-        rear_ranges = msg.ranges[175:185]
+        # 정면 및 대각선 사각지대 포함 (0도 기준 좌우 45도 -> 총 90도 범위)
+        front_ranges = msg.ranges[0:45] + msg.ranges[315:360]
         
-        # 유효한 거리(m)만 필터링
+        # 후면 및 대각선 사각지대 포함 (180도 기준 좌우 45도 -> 135 ~ 225도 범위)
+        rear_ranges = msg.ranges[135:225]
+        
+        # 유효한 거리(m)만 필터링 (센서 측정 최소/최대값 사이의 데이터만 인정)
         valid_front = [r for r in front_ranges if msg.range_min < r < msg.range_max]
         valid_rear = [r for r in rear_ranges if msg.range_min < r < msg.range_max]
 
         msg_f = Float32()
         msg_r = Float32()
         
+        # 감시 범위 내에서 가장 가까운 장애물 거리를 발행
         msg_f.data = float(min(valid_front)) if valid_front else 999.0
         msg_r.data = float(min(valid_rear)) if valid_rear else 999.0
 
