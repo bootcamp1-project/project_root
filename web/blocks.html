@@ -13,11 +13,12 @@
     --ink:#2E3350;
     --card:#FFFFFF;
     --forward:#3FB27F;
-    --backward:#FF70B8; /* 후진 블록 예쁜 핑크색 */
+    --backward:#FF70B8;
     --turn:#4C8DFF;
     --buzzer:#FFC93C;
     --wait:#A784FF;
     --repeat:#FF7A59;
+    --if-cls:#FF4B4B;
     --danger:#FF4B4B;
     --shadow: 0 6px 0 rgba(0,0,0,0.12);
   }
@@ -123,12 +124,13 @@
   .paletteBtn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,0.12);}
   .paletteBtn .emoji{font-size:30px;}
   .pb-forward{background:var(--forward);}
-  .pb-backward{background:var(--backward);} /* 팔레트 후진 */
+  .pb-backward{background:var(--backward);}
   .pb-turn_left{background:var(--turn);}
   .pb-turn_right{background:var(--turn);}
   .pb-buzzer{background:var(--buzzer); color:#5b4600;}
   .pb-wait{background:var(--wait);}
   .pb-repeat{background:var(--repeat);}
+  .pb-if{background:var(--if-cls);}
 
   #programArea{
     background:rgba(255,255,255,0.55);
@@ -205,12 +207,13 @@
     flex-shrink:0;
   }
   .b-forward{background:var(--forward);}
-  .b-backward{background:var(--backward);} /* 리스트 후진 */
+  .b-backward{background:var(--backward);}
   .b-turn_left{background:var(--turn);}
   .b-turn_right{background:var(--turn);}
   .b-buzzer{background:var(--buzzer); color:#5b4600;}
   .b-wait{background:var(--wait);}
   .b-repeat{background:var(--repeat); flex-wrap:wrap;}
+  .b-if{background:var(--if-cls); flex-wrap:wrap;}
 
   .repeatChildren{
     width:100%;
@@ -228,7 +231,7 @@
   }
   .addToRepeat button{
     border:none; border-radius:10px;
-    padding:8px 10px; font-size:20px;
+    padding:6px 10px; font-size:18px;
     background:rgba(255,255,255,0.85);
     cursor:pointer;
   }
@@ -409,6 +412,7 @@
     <button class="paletteBtn pb-buzzer" data-op="buzzer"><span class="emoji">🔔</span>소리</button>
     <button class="paletteBtn pb-wait" data-op="wait"><span class="emoji">⏱️</span>기다리기</button>
     <button class="paletteBtn pb-repeat" data-op="repeat"><span class="emoji">🔁</span>반복하기</button>
+    <button class="paletteBtn pb-if" data-op="if"><span class="emoji">❓</span>만약에</button>
   </section>
 
   <section id="programArea">
@@ -443,15 +447,15 @@ const simToggle = document.getElementById('simToggle');
 
 const OP_META = {
   forward:  {emoji:'⬆️', label:'앞으로', cls:'forward', hasSec:true},
-  backward: {emoji:'⬇️', label:'뒤로 가기', cls:'backward', hasSec:true}, // 후진 메타 데이터 추가
+  backward: {emoji:'⬇️', label:'뒤로 가기', cls:'backward', hasSec:true},
   turn_left:{emoji:'↩️', label:'왼쪽으로 돌기', cls:'turn_left'},
   turn_right:{emoji:'↪️', label:'오른쪽으로 돌기', cls:'turn_right'},
   buzzer:   {emoji:'🔔', label:'소리 내기', cls:'buzzer'},
   wait:     {emoji:'⏱️', label:'기다리기', cls:'wait', hasSec:true},
   repeat:   {emoji:'🔁', label:'반복하기', cls:'repeat', hasCount:true},
+  if:       {emoji:'❓', label:'만약 앞 장애물 발견하면', cls:'if'}
 };
 
-// 기본 동작음
 function playLaptopBuzzer() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -459,65 +463,49 @@ function playLaptopBuzzer() {
     const ctx = new AudioContext();
     const notes = [523.25, 659.25, 783.99, 1046.50]; 
     const duration = 0.08; 
-
     notes.forEach((freq, index) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      
       osc.type = 'sine';
       osc.frequency.value = freq;
-      
       gain.gain.setValueAtTime(0.2, ctx.currentTime + index * duration);
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (index + 1) * duration);
-      
       osc.connect(gain);
       gain.connect(ctx.destination);
-      
       osc.start(ctx.currentTime + index * duration);
       osc.stop(ctx.currentTime + (index + 1) * duration);
     });
-  } catch(e) {
-    console.error("오디오 구동 실패:", e);
-  }
+  } catch(e) { console.error(e); }
 }
 
-// 장애물 감지 비상 정지 경고음 (띠-띡!)
 function playErrorSound() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
     const ctx = new AudioContext();
-    
-    const notes = [493.88, 349.23]; // 하강하는 경고음
+    const notes = [493.88, 349.23]; 
     const duration = 0.15;
-
     notes.forEach((freq, index) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      
       osc.type = 'sawtooth';
       osc.frequency.value = freq;
-      
       gain.gain.setValueAtTime(0.2, ctx.currentTime + index * duration);
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (index + 1) * duration);
-      
       osc.connect(gain);
       gain.connect(ctx.destination);
-      
       osc.start(ctx.currentTime + index * duration);
       osc.stop(ctx.currentTime + (index + 1) * duration);
     });
-  } catch(e) {
-    console.error("경고음 구동 실패:", e);
-  }
+  } catch(e) { console.error(e); }
 }
 
 function newBlock(op){
   const b = {id: idSeq++, op};
-  // 후진 블록 생성 시 기본 3초 세팅
   if (op === 'forward' || op === 'backward') b.sec = 3; 
   if (op === 'wait') b.sec = 1;
   if (op === 'repeat'){ b.count = 2; b.children = []; }
+  if (op === 'if'){ b.children = []; }
   return b;
 }
 
@@ -559,15 +547,14 @@ function renderBlock(b, parentList){
   del.onclick = (e)=>{ e.stopPropagation(); removeBlock(b.id); render(); };
   li.appendChild(del);
 
-  if (b.op === 'repeat'){
+  if (b.op === 'repeat' || b.op === 'if'){
     const childWrap = document.createElement('div');
     childWrap.className = 'repeatChildren';
     b.children.forEach(cb => childWrap.appendChild(renderBlock(cb, b.children)));
 
     const addRow = document.createElement('div');
     addRow.className = 'addToRepeat';
-    // 반복 블록 안에 넣을 수 있는 버튼 목록에 'backward' 추가
-    ['forward','backward','turn_left','turn_right','buzzer','wait'].forEach(op=>{
+    ['forward','backward','turn_left','turn_right','buzzer','wait','repeat','if'].forEach(op=>{
       const m = OP_META[op];
       const btn = document.createElement('button');
       btn.textContent = m.emoji;
@@ -605,14 +592,11 @@ function makeStepper(value, step, min, max, onChange, suffix=''){
   const minus = document.createElement('button'); minus.textContent = '−';
   const val = document.createElement('span'); val.className = 'val';
   const plus = document.createElement('button'); plus.textContent = '+';
-
   let cur = value;
   function paint(){ val.textContent = (Number.isInteger(step)? cur : cur.toFixed(1)) + suffix + (suffix? '' : '초'); }
   paint();
-
   minus.onclick = (e)=>{ e.stopPropagation(); cur = Math.max(min, +(cur-step).toFixed(1)); onChange(cur); paint(); };
   plus.onclick  = (e)=>{ e.stopPropagation(); cur = Math.min(max, +(cur+step).toFixed(1)); onChange(cur); paint(); };
-
   wrap.appendChild(minus); wrap.appendChild(val); wrap.appendChild(plus);
   return wrap;
 }
@@ -625,17 +609,17 @@ document.querySelectorAll('.paletteBtn').forEach(btn=>{
   });
 });
 
-function flatten(list){
-  const out = [];
-  for (const b of list){
-    if (b.op === 'repeat'){
-      const inner = flatten(b.children);
-      for (let i=0;i<b.count;i++) out.push(...inner);
+function serializeProgram(list) {
+  return list.map(b => {
+    if (b.op === 'repeat') {
+      return { op: 'repeat', count: b.count, blocks: serializeProgram(b.children) };
+    } else if (b.op === 'if') {
+      return { op: 'if', cond: 'front_obstacle', then: serializeProgram(b.children) };
     } else {
-      const {id, ...rest} = b; out.push(rest);
+      const {id, children, ...rest} = b;
+      return rest;
     }
-  }
-  return out;
+  });
 }
 
 function setLocked(locked){
@@ -649,32 +633,11 @@ function clearHighlights(){
   document.querySelectorAll('.block.running').forEach(el=>el.classList.remove('running'));
 }
 
-function mapFlatIndexToSourceEl(flatIdx) {
-  if (flatIdx >= 0 && flatIdx < flatSourceMap.length) { return flatSourceMap[flatIdx]; }
-  return null;
-}
-
-function highlightByFlatIndex(flatIdx){
+function highlightById(id){
   clearHighlights();
-  const target = mapFlatIndexToSourceEl(flatIdx);
+  if(!id) return;
+  const target = document.querySelector(`.block[data-id="${id}"]`);
   if (target) target.classList.add('running');
-}
-
-let flatSourceMap = []; 
-function buildFlatSourceMap(list, liList){
-  const map = [];
-  function walk(blocks, lis){
-    blocks.forEach((b, i)=>{
-      const li = lis[i];
-      if (!li) return;
-      if (b.op === 'repeat'){
-        const childLis = li.querySelectorAll(':scope > .repeatChildren > .block');
-        for (let r=0;r<b.count;r++){ walk(b.children, Array.from(childLis)); }
-      } else { map.push(li); }
-    });
-  }
-  walk(list, liList);
-  return map;
 }
 
 function showBanner(emoji, text, ms=2200){
@@ -686,15 +649,20 @@ function showBanner(emoji, text, ms=2200){
 
 const KID_REASONS = { '장애물 감지': ['🙈', '앞에 뭔가 있어요!'], '사용자 중지': ['✋', '멈췄어요!'] };
 
+function highlightActiveBlock(op) {
+  clearHighlights();
+  if (!op) return;
+  const blocks = document.querySelectorAll(`.block.b-${op}`);
+  if (blocks.length > 0) {
+    blocks[0].classList.add('running');
+  }
+}
+
 function handleRunState(s){
   if (s.state === 'running'){
-    flatSourceMap = buildFlatSourceMap(program, Array.from(listEl.children));
     setLocked(true);
   } else if (s.state === 'block'){
-    const total = flatSourceMap.length;
-    const doneCount = s.left != null ? (total - s.left - 1) : null;
-    const idx = doneCount != null ? doneCount : 0;
-    highlightByFlatIndex(idx);
+    highlightActiveBlock(s.op);
     if (s.op === 'buzzer') { playLaptopBuzzer(); }
   } else if (s.state === 'done'){
     clearHighlights(); setLocked(false); showBanner('🎉','완료!'); confettiBurst();
@@ -702,11 +670,7 @@ function handleRunState(s){
     clearHighlights(); setLocked(false); 
     const [emoji, text] = KID_REASONS[s.reason] || ['⚠️', s.reason || '멈췄어요'];
     showBanner(emoji, text, 3000);
-    
-    // 장애물을 감지하여 멈췄을 때 폰에서 경고음 재생
-    if (s.reason === '장애물 감지') {
-      playErrorSound();
-    }
+    if (s.reason === '장애물 감지') { playErrorSound(); }
   }
 }
 
@@ -729,9 +693,9 @@ function confettiBurst(){
 
 runBtn.addEventListener('click', ()=>{
   if (running || program.length===0) return;
-  const flat = flatten(program);
-  if (simMode || !ros){ runSimulation(flat); return; }
-  progTopic.publish(new ROSLIB.Message({ data: JSON.stringify(flat) }));
+  const serialized = serializeProgram(program);
+  if (simMode || !ros){ runSimulation(serialized); return; }
+  progTopic.publish(new ROSLIB.Message({ data: JSON.stringify(serialized) }));
 });
 
 stopBtn.addEventListener('click', ()=>{
@@ -740,10 +704,23 @@ stopBtn.addEventListener('click', ()=>{
   stopTopic.publish(new ROSLIB.Message({ data: true }));
 });
 
+function flattenForSim(list){
+  const out = [];
+  for (const b of list){
+    if (b.op === 'repeat'){
+      const inner = flattenForSim(b.blocks);
+      for (let i=0;i<b.count;i++) out.push(...inner);
+    } else if (b.op === 'if') {
+      out.push(...flattenForSim(b.then));
+    } else { out.push(b); }
+  }
+  return out;
+}
+
 let simTimer = null, simIdx = 0, simFlat = [];
-function runSimulation(flat){
-  simFlat = flat; simIdx = 0;
-  handleRunState({state:'running', total: flat.length});
+function runSimulation(serialized){
+  simFlat = flattenForSim(serialized); simIdx = 0;
+  handleRunState({state:'running', total: simFlat.length});
   simStep();
 }
 function simStep(){
