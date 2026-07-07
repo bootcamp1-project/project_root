@@ -1,176 +1,290 @@
 # 🧩 블록 코딩 로봇 교육 플랫폼
 
-> ROS 2와 웹 기반 블록 코딩을 이용한 초등학생 대상 로봇 교육 프로젝트
+> **ROS 2 Humble 기반 TurtleBot3 블록 코딩 교육 플랫폼**  
+> 웹에서 작성한 중첩 블록 프로그램을 런타임에 실시간 해석하여 TurtleBot3를 제어하는 프로젝트입니다.
 
 ---
 
 ## 📖 프로젝트 소개
 
-본 프로젝트는 **초등학생을 위한 블록 코딩 기반 로봇 제어 시스템**을 개발하는 것을 목표로 합니다.
+본 프로젝트는 **초등학생을 위한 블록 코딩 기반 로봇 제어 시스템**입니다.
 
-사용자는 스마트폰 또는 태블릿의 웹 애플리케이션에서 블록을 조합하여 프로그램을 작성하고, 실행 버튼을 누르면 TurtleBot이 작성된 순서대로 동작합니다.
+사용자는 웹 브라우저에서 Scratch 형태의 블록을 조립하여 프로그램을 작성하고 실행할 수 있으며, 프로그램은 **중첩된 JSON 트리(Nested JSON Tree)** 형태로 ROS 2에 전달됩니다.
 
-실행 중에는 현재 실행 중인 블록을 화면에서 실시간으로 확인할 수 있으며, **360도 라이다(LiDAR) 센서를 통해 전진 및 후진 시 장애물을 감지하면 즉시 안전하게 정지**합니다.
-
-프로젝트는 ROS 2와 웹 기술을 연동하여 인터프리터 기반 블록 실행 구조를 구현하고, 사용자 중심의 UI/UX 설계와 100% 안전한 주행 환경 제공을 목표로 합니다.
+Interpreter Node는 이를 미리 평탄화(Unrolling)하지 않고 **실행 시점(Runtime)** 에 직접 해석하여 반복문과 조건문을 처리합니다. 또한 주행 중 센서 데이터를 실시간으로 반영하여 프로그램의 흐름을 변경할 수 있습니다.
 
 ---
 
-## 🎯 주요 기능
+## ✨ 주요 기능
 
-- **블록 코딩 프로그램 작성:** 직관적인 Drag & Drop 기반 UI
-- **블록 순차 실행(Interpreter):** 앞으로, 뒤로, 회전, 대기, 소리 등
-- **실행 블록 하이라이트:** 현재 로봇이 수행 중인 명령을 웹 화면에 실시간 표시
-- **지능형 양방향 장애물 감지:** 라이다(LDS-03) 센서를 활용해 로봇 진행 방향(전방/후방 20cm)의 장애물 감지 시 자동 정지
-- **웹 브라우저 피드백:** 비상 정지 시 스마트폰/PC에서 귀여운 배너 알림 및 경고음 출력
-- **실행 중 긴급 정지 버튼:** 언제든 사용자가 로봇을 멈출 수 있는 하드 스톱 기능
+### 🧱 블록 기반 프로그래밍
+
+- Drag & Drop 방식의 블록 조립
+- 반복문(`repeat`)
+- 조건문(`if`)
+- 반복문 내부 조건문 등 중첩 구조 지원
 
 ---
 
-## 🏗 시스템 구조
+### ⚙️ Runtime Tree Interpreter
+
+기존처럼 블록을 모두 펼쳐서 실행하지 않고,
+
+- Nested JSON Tree 수신
+- Stack 기반 Runtime Interpreter
+- 실행 시점에 현재 블록 해석
+- 반복 및 조건문 실시간 처리
+
+방식으로 동작합니다.
+
+---
+
+### 🚧 Runtime Skip & Branch
+
+주행 중 장애물이 발견되면 프로그램 전체를 종료하지 않습니다.
+
+```
+앞으로 이동
+      │
+장애물 감지
+      │
+현재 이동 블록 Skip
+      │
+다음 조건문 실행
+```
+
+이를 통해 실행 흐름을 자연스럽게 이어갈 수 있습니다.
+
+---
+
+### 📡 90° LiDAR Sector Scan
+
+기존의 좁은 감지 각도 대신
+
+- 전방 ±45°
+- 후방 ±45°
+
+총 **90° 부채꼴 영역**을 스캔하여 대각선 방향 장애물 감지 성능을 향상시켰습니다.
+
+---
+
+### 🎨 실시간 실행 하이라이트
+
+Interpreter에서 현재 실행 중인 Operator(op)를 `/run_state` 토픽으로 전송하여
+
+- 현재 실행 중인 블록
+- 실제 TurtleBot3 동작
+
+을 웹 화면과 실시간으로 동기화합니다.
+
+---
+
+### 🔒 실행 중 안전 제어
+
+실행 중 프로그램 변경으로 인한 충돌을 방지하기 위해
+
+- Web UI 편집 Lock
+- Robot Program Drop
+
+방식을 적용하였습니다.
+
+---
+
+### 🔔 비동기 초기 안정화
+
+블록이 변경되는 순간 발생할 수 있는 센서 오작동을 방지하기 위해 초기 Latch 구간을 적용하여 안정성을 높였습니다.
+
+---
+
+# 🏗 시스템 아키텍처
 
 ```text
-        Web App (스마트폰/PC 브라우저)
-          │
-          ▼
-   interpreter_node (웹소켓 서버 내장, 핵심 뇌 노드)
-      │        │
-      │        ├── /buzzer
-      │
-      └── /cmd_vel
-          │
-          ▼
-      TurtleBot3 (모터 구동부)
-          ▲
-          │
- /obstacle_dist/front & rear
-          ▲
-          │
- LiDAR Node (ultrasonic_node.py)
+             Web Application
+     (Drag & Drop Block Editor)
+                 │
+                 │  /program
+                 ▼
+        Interpreter Node
+(Runtime Tree Interpreter Engine)
+                 │
+      ┌──────────┼───────────┐
+      │          │           │
+      ▼          ▼           ▼
+   /cmd_vel   /buzzer    /run_state
+                 ▲
+                 │
+      /obstacle_dist/front
+      /obstacle_dist/rear
+                 ▲
+                 │
+      Ultrasonic (LiDAR) Node
 ```
 
 ---
 
-## 📂 프로젝트 구조
+# 📂 프로젝트 구조
 
 ```text
 project_root/
-├── README.md              # 프로젝트 소개 + 터틀봇 구동 및 웹앱 실행 방법
-├── PLAN.md                # Day 1: 프로젝트 계획서
-├── INTERFACE.md           # Day 1: 토픽 인터페이스 정의서 (/program, /run_state 등)
-├── DAILY_LOG.md            # Day 2~4: 일일 스탠드업 로그 (누적)
-├── TEST.md                # Day 3~4: 테스트 시나리오 및 결과 (주행 및 스피커 우회 테스트)
-├── REPORT.md              # Day 5: 최종 보고서 (KPT 포함)
-├── PROJECT_GUIDE.md       # 프로젝트 운영 가이드
+│
+├── README.md
+├── PLAN.md
+├── INTERFACE.md
+├── DAILY_LOG.md
+├── TEST.md
+├── REPORT.md
+├── PROJECT_GUIDE.md
 │
 ├── web/
-│   └── blocks.html        # 모바일 최적화 UI + 브라우저 자체 경고음 내장 웹앱
+│   └── blocks.html
 │
 ├── ros2_ws/
 │   └── src/
-│       └── block_robot/   # 핵심 ROS 2 블록 제어 패키지
-│           ├── package.xml        # turtlebot3_msgs 등 의존성이 추가된 패키지 설정 파일
-│           ├── setup.py           # 노드 실행 파일 및 런치 엔트리포인트 등록 설정
+│       └── block_robot/
+│           ├── package.xml
+│           ├── setup.py
 │           ├── launch/
-│           │   └── bringup.launch.py # interpreter_node, ultrasonic_node, buzzer_node를 한 번에 켜는 통합 런치 파일
+│           │   └── bringup.launch.py
 │           └── block_robot/
-│               ├── __init__.py
-│               ├── interpreter_node.py # [핵심] JSON 순차 실행 및 양방향 안전 정지 로직 포함
-│               ├── buzzer_node.py      # /buzzer 토픽을 OpenCR 사운드로 중계하는 부저 노드
-│               └── ultrasonic_node.py  # 라이다(LDS-03) 전/후방 거리 스캔 노드 (호환성을 위해 기존 파일명 유지)
+│               ├── interpreter_node.py
+│               ├── ultrasonic_node.py
+│               └── buzzer_node.py
 │
-├── images/                # 아키텍처 및 시스템 데이터 흐름 다이어그램
-└── media/                 # 터틀봇 주행 및 웹앱 연동 시연 영상, 스크린샷
+├── images/
+└── media/
 ```
 
 ---
 
-## ⚙ 개발 환경
+# ⚙️ 개발 환경
 
-- Ubuntu 22.04
-- ROS 2 Humble
-- Python 3
-- HTML / CSS / JavaScript (웹 오디오 API 활용)
-- rosbridge_suite
-- TurtleBot3 (LDS-03 LiDAR 센서 활용)
+| 항목 | 내용 |
+|------|------|
+| OS | Ubuntu 22.04 LTS |
+| Middleware | ROS 2 Humble |
+| Language | Python 3 |
+| Front-End | HTML5 / CSS3 / JavaScript (ES6) |
+| Robot | TurtleBot3 Burger |
+| Sensor | LDS-03 LiDAR |
+| Communication | rosbridge_suite (WebSocket) |
 
 ---
 
-## 🚀 실행 방법
+# 🚀 실행 방법
 
-전체 시스템은 **① 터틀봇 하드웨어 노드 → ② ROS 2 통합 런치 파일 → ③ 웹 서버 → ④ 웹앱 접속**의 순서로 켜야 합니다.  
-`bringup.launch.py`는 ROS 2 노드(interpreter_node, ultrasonic_node, buzzer_node)만 실행하며, 웹 서버는 포함되어 있지 않으므로 아래 3번 단계에서 별도로 실행해야 합니다.
-
-### 1. 패키지 빌드
+## 1. 패키지 빌드
 
 ```bash
 cd ~/ros2_ws
+
 colcon build --packages-select block_robot
+
 source install/setup.bash
 ```
 
-### 2. 하드웨어 기본 노드 실행 (터틀봇 라즈베리파이에서 실행)
+---
+
+## 2. TurtleBot3 Bringup
+
+라즈베리파이에서 실행합니다.
 
 ```bash
 export TURTLEBOT3_MODEL=burger
+
 ros2 launch turtlebot3_bringup robot.launch.py
 ```
 
-### 3. 블록 코딩 통합 런치 파일 실행 (PC 터미널에서 실행)
+---
 
-아래 명령어로 interpreter_node, ultrasonic_node, buzzer_node가 동시에 실행됩니다.
+## 3. ROS 2 노드 실행
 
 ```bash
 ros2 launch block_robot bringup.launch.py
 ```
 
-### 4. 웹 서버 실행 (PC의 새 터미널에서 실행)
+실행되는 노드
 
-`web/` 디렉토리로 이동한 뒤, 아래 명령어로 웹 서버를 켭니다.
+- interpreter_node
+- ultrasonic_node
+- buzzer_node
+
+---
+
+## 4. 웹 서버 실행
 
 ```bash
 cd ~/ros2_ws/src/block_robot/web
+
 python3 -m http.server 8000
 ```
 
-### 5. 웹앱 접속
+---
 
-스마트폰 또는 노트북의 브라우저에서 아래 주소로 접속합니다. (실제 환경에 맞게 IP 변경)
+## 5. 브라우저 접속
 
-```text
+```
 http://localhost:8000/blocks.html
+```
+
 또는
-http://[노트북_IP]:8000/blocks.html
+
+```
+http://<PC_IP>:8000/blocks.html
 ```
 
 ---
 
-## 📄 프로젝트 문서
+# 📡 주요 ROS 2 토픽
+
+| Topic | 설명 |
+|--------|------|
+| `/program` | 블록 프로그램 전송 |
+| `/cmd_vel` | TurtleBot3 이동 명령 |
+| `/buzzer` | 부저 제어 |
+| `/run_state` | 현재 실행 중인 Operator |
+| `/obstacle_dist/front` | 전방 장애물 거리 |
+| `/obstacle_dist/rear` | 후방 장애물 거리 |
+
+---
+
+# 📚 프로젝트 문서
 
 | 문서 | 설명 |
-| --- | --- |
-| PLAN.md | 프로젝트 계획서 |
-| INTERFACE.md | ROS 2 인터페이스 정의 |
-| DAILY_LOG.md | 개발 일지 |
-| TEST.md | 테스트 결과 |
-| REPORT.md | 최종 보고서 |
-| PROJECT_GUIDE.md | 프로젝트 운영 가이드 |
+|------|------|
+| **PLAN.md** | 요구사항 분석 및 개발 계획 |
+| **INTERFACE.md** | ROS 2 인터페이스 및 JSON 프로토콜 |
+| **DAILY_LOG.md** | 개발 일지 및 트러블슈팅 |
+| **TEST.md** | 통합 테스트 결과 |
+| **REPORT.md** | 최종 프로젝트 보고서 |
+| **PROJECT_GUIDE.md** | 프로젝트 빌드 및 실행 가이드 |
 
 ---
 
-## 👥 Team
+# 👥 Team
 
-| 이름 | 역할 |
-| --- | --- |
+| 이름 | 담당 |
+|------|------|
 | 박준서 | 팀장 |
-| 박정호 | 팀원 |
-| 김건호 | 팀원 |
-| 윤태환 | 팀원 |
-| 김민찬 | 팀원 |
-| 김성수 | 팀원 |
+| 박정호 | 프로젝트 총괄 및 시스템 설계 Runtime Tree Interpreter, ROS2, Full Stack |
+| 김건호 | 블록 UI 및 JSON 직렬화 |
+| 윤태환 | Interpreter 구조 개선 및 주행 로직 |
+| 김민찬 | LiDAR 및 Buzzer Node |
+| 김성수 | Build 및 Launch 환경 구성 |
 
 ---
 
-## 📜 License
+# 🎯 프로젝트 성과
+
+- Runtime Tree Interpreter 구현
+- Nested Loop / If 실시간 해석
+- Runtime Skip & Branch 지원
+- LiDAR 90° Sector Scan 적용
+- Web-ROS2 실시간 상태 동기화
+- 실행 중 UI Lock 및 Program Drop 적용
+- ROS 2와 웹 기반 블록 코딩 교육 플랫폼 구현
+
+---
+
+# 📄 License
 
 This project was developed for educational purposes.
