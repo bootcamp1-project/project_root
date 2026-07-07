@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""interpreter_node: 블록 프로그램 순차 실행 + 전/후방 안전 방어"""
+"""interpreter_node: 중첩 반복문 및 실시간 IF 제어 흐름 완벽 통합 엔진"""
 import json
 import rclpy
 from rclpy.node import Node
@@ -7,7 +7,7 @@ from std_msgs.msg import String, Bool, Float32
 from geometry_msgs.msg import Twist
 
 OBSTACLE_M = 0.20      # 장애물 제한 거리 (20cm)
-TURN_90_SEC = 3.4      # 90도 회전 시간 (실측 보정 값)
+TURN_90_SEC = 3.4      # 90도 회전 시간
 LINEAR_SPEED = 0.10    # 전진/후진 속도 (m/s)
 ANGULAR_SPEED = 0.5    # 회전 속도 (rad/s)
 
@@ -18,7 +18,6 @@ class InterpreterNode(Node):
         self.sub_prog = self.create_subscription(String, '/program', self.on_program, 10)
         self.sub_stop = self.create_subscription(Bool, '/run_stop', self.on_stop, 10)
         
-        # 전방/후방 거리 각각 구독
         self.sub_front = self.create_subscription(Float32, '/obstacle_dist/front', self.on_dist_front, 10)
         self.sub_rear = self.create_subscription(Float32, '/obstacle_dist/rear', self.on_dist_rear, 10)
         
@@ -35,7 +34,7 @@ class InterpreterNode(Node):
         self.is_running = False  
         
         self.timer = self.create_timer(0.1, self.tick)
-        self.get_logger().info('★ 완벽 패치: [전/후방 장애물 회피] 지능이 추가되었습니다!')
+        self.get_logger().info('★ [반복문 내 IF문 패치] 하이브리드 트리 런타임 엔진 탑재 완료!')
 
     def send_state(self, status, **kwargs):
         msg = String()
@@ -44,11 +43,9 @@ class InterpreterNode(Node):
 
     def on_program(self, msg):
         if self.is_running:
-            self.get_logger().warn('이미 실행 중입니다!')
             return
         try:
-            raw_program = json.loads(msg.data)
-            self.program = self.preprocess_program(raw_program)
+            self.program = json.loads(msg.data)
             if not self.program:
                 self.send_state('done')
                 return
@@ -58,18 +55,6 @@ class InterpreterNode(Node):
         except Exception as e:
             self.get_logger().error(f'프로그램 파싱 실패: {e}')
             self.abort('데이터 오류')
-
-    def preprocess_program(self, blocks):
-        flat_list = []
-        for block in blocks:
-            if block.get('op') == 'repeat':
-                count = int(block.get('count', 1))
-                inner_blocks = block.get('blocks', [])
-                for _ in range(count):
-                    flat_list.extend(self.preprocess_program(inner_blocks))
-            else:
-                flat_list.append(block)
-        return flat_list
 
     def on_stop(self, msg):
         if msg.data and self.is_running:
@@ -90,23 +75,47 @@ class InterpreterNode(Node):
         self.send_state('aborted', reason=reason)
 
     def next_block(self):
-        if not self.program:
-            if self.cur is not None or self.is_running:
-                self.cur = None
+        """반복문 내부에 IF문이나 다른 제어 블록이 중첩되어도 런타임에 실시간으로 한 단계씩 해석합니다."""
+        while self.program:
+            block = self.program.pop(0)
+            op = block.get('op')
+            
+            # 1. 런타임 반복문 해석: 자식 블록들을 개수만큼 풀어 헤쳐 대기열 맨 앞에 주입 (중첩 구조 보존)
+            if op == 'repeat':
+                count = int(block.get('count', 1))
+                inner_blocks = block.get('blocks', []) # blocks.html 규격과 연동
+                unrolled = []
+                for _ in range(count):
+                    unrolled.extend(json.loads(json.dumps(inner_blocks)))
+                self.program = unrolled + self.program
+                continue # 루프를 다시 돌려 방금 풀린 첫 번째 블록을 해석함
+                
+            # 2. 런타임 IF문 해석: 반복문 안에서 차례가 돌아온 '바로 지금 이 순간' 센서값을 체크!
+            elif op == 'if':
+                cond = block.get('cond')
+                if cond == 'front_obstacle' and self.dist_front < OBSTACLE_M:
+                    then_blocks = block.get('then', [])
+                    self.program = json.loads(json.dumps(then_blocks)) + self.program
+                continue # 조건이 맞지 않으면 자식을 풀지 않고 그냥 패스함
+
+            self.cur = block
+            break
+        
+        if not self.cur:
+            if self.is_running:
                 self.is_running = False
                 self.pub_vel.publish(Twist()) 
                 self.send_state('done')
             return
 
-        self.cur = self.program.pop(0)
+        # 동작 시간 세팅
         op = self.cur['op']
-        
         if op in ('forward', 'backward'):
-            self.remain = float(self.cur.get('sec', 1))
+            self.remain = float(self.cur.get('sec', 3.0))
         elif op in ('turn_left', 'turn_right'):
             self.remain = TURN_90_SEC
         elif op == 'wait':
-            self.remain = float(self.cur.get('sec', 1))
+            self.remain = float(self.cur.get('sec', 1.0))
         elif op == 'buzzer':
             buz = Bool()
             buz.data = True
@@ -119,38 +128,30 @@ class InterpreterNode(Node):
         cmd = Twist()
         if not self.is_running:
             return
+            
         if self.cur is None:
             self.next_block()
             
         if self.cur is not None:
             op = self.cur['op']
             
-            # [핵심] 앞으로 갈 때는 앞을, 뒤로 갈 때는 뒤를 검사!
+            # 주행 중에 벽을 보면 현재 명령 블록만 스킵하고 제어권을 즉시 다음 블록(IF 등)으로 이양
             if op == 'forward' and self.dist_front < OBSTACLE_M:
-                self.get_logger().warn(f"🚨 전방 장애물 감지! (거리: {self.dist_front:.2f}m)")
-                self.abort('장애물 감지') # HTML 호환성을 위해 에러명 '장애물 감지' 유지
+                self.get_logger().warn(f"⚠️ [주행 중 탈출] 전방 장애물 감지! 다음 블록으로 이동합니다. (거리: {self.dist_front:.2f}m)")
+                self.pub_vel.publish(Twist()) 
+                self.cur = None 
                 return
             elif op == 'backward' and self.dist_rear < OBSTACLE_M:
-                self.get_logger().warn(f"🚨 후방 장애물 감지! (거리: {self.dist_rear:.2f}m)")
-                self.abort('장애물 감지') # HTML 호환성을 위해 에러명 '장애물 감지' 유지
+                self.get_logger().warn(f"⚠️ [주행 중 탈출] 후방 장애물 감지! 다음 블록으로 이동합니다. (거리: {self.dist_rear:.2f}m)")
+                self.pub_vel.publish(Twist())
+                self.cur = None
                 return
 
-            # 속도 및 회전 부여
-            if op == 'forward':
-                cmd.linear.x = LINEAR_SPEED
-                cmd.angular.z = 0.0
-            elif op == 'backward':
-                cmd.linear.x = -LINEAR_SPEED
-                cmd.angular.z = 0.0
-            elif op == 'turn_left':
-                cmd.linear.x = 0.0
-                cmd.angular.z = ANGULAR_SPEED
-            elif op == 'turn_right':
-                cmd.linear.x = 0.0
-                cmd.angular.z = -ANGULAR_SPEED
-            elif op == 'wait' or op == 'buzzer':
-                cmd.linear.x = 0.0
-                cmd.angular.z = 0.0
+            # 모터 제어
+            if op == 'forward': cmd.linear.x = LINEAR_SPEED
+            elif op == 'backward': cmd.linear.x = -LINEAR_SPEED
+            elif op == 'turn_left': cmd.angular.z = ANGULAR_SPEED
+            elif op == 'turn_right': cmd.angular.z = -ANGULAR_SPEED
 
             self.remain -= 0.1
             if self.remain <= 0:
