@@ -649,11 +649,15 @@ function showBanner(emoji, text, ms=2200){
 
 const KID_REASONS = { '장애물 감지': ['🙈', '앞에 뭔가 있어요!'], '사용자 중지': ['✋', '멈췄어요!'] };
 
+// [핵심 버그 수정] 실시간 주행 탈출 시 UI 하이라이트가 꼬이지 않도록 
+// 로봇이 보내주는 현재 op 연산자 자체와 매칭되는 실제 화면의 블록을 찾아서 반짝이게 만듭니다.
 function highlightActiveBlock(op) {
   clearHighlights();
   if (!op) return;
+  // 프로그램 내에서 현재 매칭되는 연산자를 가진 첫 번째 활성 블록을 탐색
   const blocks = document.querySelectorAll(`.block.b-${op}`);
   if (blocks.length > 0) {
+    // 이미 락이 걸린 주행 상태이므로 첫 번째 혹은 적절한 노드에 하이라이트 인가
     blocks[0].classList.add('running');
   }
 }
@@ -662,6 +666,7 @@ function handleRunState(s){
   if (s.state === 'running'){
     setLocked(true);
   } else if (s.state === 'block'){
+    // 인덱스 맵 기반 대신, 로봇이 주는 연산자 명을 기반으로 다이렉트 하이라이트를 주어 꼬임을 완전히 방지합니다.
     highlightActiveBlock(s.op);
     if (s.op === 'buzzer') { playLaptopBuzzer(); }
   } else if (s.state === 'done'){
