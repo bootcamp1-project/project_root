@@ -23,7 +23,6 @@
     --shadow: 0 6px 0 rgba(0,0,0,0.12);
   }
 
-  /* 다크모드 테마 변수 */
   body.dark-mode {
     --sky-top: #1a1a2e;
     --sky-bot: #16213e;
@@ -57,40 +56,29 @@
     gap:12px;
     flex-shrink: 0;
   }
-  header h1{
-    margin:0;
-    font-size:26px;
-    color:var(--ink);
-  }
+  header h1{ margin:0; font-size:26px; color:var(--ink); }
+  
   #connState{
-    font-size:14px;
-    padding:6px 14px;
-    border-radius:20px;
-    background:#fff;
-    box-shadow:var(--shadow);
+    font-size:14px; padding:6px 14px; border-radius:20px;
+    background:#fff; box-shadow:var(--shadow);
   }
   #connState.ok{background:#DFFFEA; color:#2E3350;}
   #connState.bad{background:#FFE3E3; color:#2E3350;}
-  
   body.dark-mode #connState { background: #333; color: #fff; }
 
   #connectPanel{
     display:flex; gap:8px; align-items:center;
     background:rgba(255,255,255,0.6);
     padding:10px 14px; border-radius:16px;
-    margin:0 16px 10px;
-    font-size:14px;
-    flex-wrap:wrap;
-    flex-shrink: 0;
+    margin:0 16px 10px; font-size:14px;
+    flex-wrap:wrap; flex-shrink: 0;
     transition: background 0.3s ease;
   }
   body.dark-mode #connectPanel { background: rgba(30, 30, 46, 0.75); }
   
   #connectPanel input{
-    flex:1; min-width:140px;
-    padding:8px 10px; border-radius:10px;
-    border:1px solid #cfd6e6;
-    font-size:14px;
+    flex:1; min-width:140px; padding:8px 10px; border-radius:10px;
+    border:1px solid #cfd6e6; font-size:14px;
   }
   body.dark-mode #connectPanel input { background: #2a2a3b; color: #fff; border-color: #444; }
 
@@ -105,44 +93,28 @@
   #simToggle.on{background:#A784FF; color:#fff;}
 
   main{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    padding:0 16px 140px;
-    overflow: hidden;
+    flex:1; display:flex; flex-direction:column;
+    gap:14px; padding:0 16px 140px; overflow: hidden;
   }
 
   #palette{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(84px,1fr));
-    gap:10px;
-    background:rgba(255,255,255,0.6);
-    padding:12px;
-    border-radius:20px;
-    flex-shrink: 0;
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr));
+    gap:10px; background:rgba(255,255,255,0.6);
+    padding:12px; border-radius:20px; flex-shrink: 0;
     transition: all 0.3s ease;
   }
   body.dark-mode #palette { background: rgba(30, 30, 46, 0.75); }
 
   .paletteBtn{
-    min-height:72px;
-    border:none;
-    border-radius:18px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:4px;
-    font-size:14px;
-    font-family:'Gaegu',sans-serif;
-    color:#fff;
-    cursor:pointer;
-    box-shadow:var(--shadow);
-    transition:transform .08s ease;
+    min-height:72px; border:none; border-radius:18px;
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:4px; font-size:14px;
+    font-family:'Gaegu',sans-serif; color:#fff;
+    cursor:pointer; box-shadow:var(--shadow); transition:transform .08s ease;
   }
   .paletteBtn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,0.12);}
   .paletteBtn .emoji{font-size:30px;}
+  
   .pb-forward{background:var(--forward);}
   .pb-backward{background:var(--backward);}
   .pb-turn_left{background:var(--turn);}
@@ -153,86 +125,50 @@
   .pb-if{background:var(--if-cls);}
 
   #programArea{
-    background:rgba(255,255,255,0.55);
-    border-radius:20px;
-    padding:14px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    transition: background 0.3s ease;
+    background:rgba(255,255,255,0.55); border-radius:20px;
+    padding:14px; flex: 1; display: flex; flex-direction: column;
+    overflow: hidden; transition: background 0.3s ease;
   }
   body.dark-mode #programArea { background: rgba(30, 30, 46, 0.75); }
-  
   #programArea h2{margin:0; font-size:18px; flex-shrink: 0;}
   
   #programList{
-    list-style:none;
-    margin:0; padding:0;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    flex: 1;
-    overflow-y: auto;    
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    padding-right: 4px;
-    min-height: 100px; /* 빈 리스트에도 드롭 가능하도록 공간 확보 */
+    list-style:none; margin:0; padding:0; display:flex; flex-direction:column;
+    gap:10px; flex: 1; overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; padding-right: 4px;
+    min-height: 150px;
   }
-
   #programList::-webkit-scrollbar { width: 6px; }
   #programList::-webkit-scrollbar-track { background: transparent; }
   #programList::-webkit-scrollbar-thumb { background: rgba(46, 51, 80, 0.3); border-radius: 10px; }
   #programList::-webkit-scrollbar-thumb:hover { background: rgba(46, 51, 80, 0.5); }
 
-  #emptyHint{
-    text-align:center;
-    color:#8891B0;
-    padding:24px 8px;
-    font-size:16px;
-    pointer-events: none; /* 드래그 이벤트 방해 방지 */
-  }
+  #emptyHint{ text-align:center; color:#8891B0; padding:24px 8px; font-size:16px; pointer-events: none; }
 
   .block{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:12px 14px;
-    border-radius:16px;
-    color:#fff;
-    box-shadow:var(--shadow);
-    min-height:60px;
-    cursor:grab;
-    position:relative;
-    flex-shrink: 0;
-    transition: margin 0.2s ease;
+    display:flex; align-items:center; gap:10px; padding:12px 14px;
+    border-radius:16px; color:#fff; box-shadow:var(--shadow);
+    min-height:60px; cursor:grab; position:relative; flex-shrink: 0;
   }
   .block.dragging{opacity:.4;}
   .block .emoji{font-size:26px; flex-shrink:0;}
   .block .label{flex:1; font-size:17px;}
   .block .stepper{
     display:flex; align-items:center; gap:6px;
-    background:rgba(255,255,255,0.25);
-    border-radius:12px;
-    padding:2px 6px;
+    background:rgba(255,255,255,0.25); border-radius:12px; padding:2px 6px;
   }
   .block .stepper button{
-    width:34px;height:34px;
-    border:none;border-radius:10px;
-    background:rgba(255,255,255,0.9);
-    font-size:18px; font-weight:bold;
-    cursor:pointer;
-    color: #2E3350;
+    width:34px;height:34px; border:none;border-radius:10px;
+    background:rgba(255,255,255,0.9); font-size:18px; font-weight:bold;
+    cursor:pointer; color: #2E3350;
   }
   .block .stepper .val{min-width:34px; text-align:center; font-size:16px;}
   .block .delBtn{
-    width:34px;height:34px;
-    border:none;border-radius:10px;
-    background:rgba(0,0,0,0.15);
-    color:#fff; font-size:16px;
-    cursor:pointer;
-    flex-shrink:0;
+    width:34px;height:34px; border:none;border-radius:10px;
+    background:rgba(0,0,0,0.15); color:#fff; font-size:16px;
+    cursor:pointer; flex-shrink:0;
   }
+  
   .b-forward{background:var(--forward);}
   .b-backward{background:var(--backward);}
   .b-turn_left{background:var(--turn);}
@@ -243,123 +179,84 @@
   .b-if{background:var(--if-cls); flex-wrap:wrap;}
 
   .repeatChildren{
-    width:100%;
-    margin-top:8px;
-    padding:12px 8px 8px;
-    border-radius:12px;
-    background:rgba(255,255,255,0.2);
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    transition: background 0.2s, outline 0.2s;
-    min-height: 60px; /* 비어있어도 드롭존으로 활용되게 공간 확보 */
+    width:100%; margin-top:8px; padding:12px 8px 8px;
+    border-radius:12px; background:rgba(255,255,255,0.2);
+    display:flex; flex-direction:column; gap:8px;
+    min-height: 65px; transition: all 0.2s ease;
   }
-  
-  /* 드래그 앤 드롭 하이라이트 영역 */
-  .repeatChildren.drag-over {
-    background: rgba(255, 255, 255, 0.5);
-    outline: 3px dashed rgba(255, 255, 255, 0.9);
-  }
-  
   body.dark-mode .repeatChildren { background:rgba(0,0,0,0.3); }
-  body.dark-mode .repeatChildren.drag-over { background:rgba(0,0,0,0.6); outline: 3px dashed #fff; }
+
+  /* 💡 삽입 위치를 알려주는 파란색 가이드 라인 (드롭 인디케이터) */
+  .block.drag-top::before {
+    content: ''; position: absolute;
+    top: -7px; left: 0; right: 0; height: 5px;
+    background: #4C8DFF; border-radius: 3px; z-index: 10;
+  }
+  .block.drag-bottom::after {
+    content: ''; position: absolute;
+    bottom: -7px; left: 0; right: 0; height: 5px;
+    background: #4C8DFF; border-radius: 3px; z-index: 10;
+  }
+  
+  /* 💡 '반복' 블럭 안으로 쏙 넣을 때의 하이라이트 박스 */
+  .repeatChildren.drag-inside {
+    background: rgba(76, 141, 255, 0.2) !important;
+    outline: 3px dashed #4C8DFF !important;
+  }
+  body.dark-mode .repeatChildren.drag-inside { background: rgba(76, 141, 255, 0.3) !important; }
 
   .repeatChildren .block{box-shadow:none; min-height:50px;}
-  .addToRepeat{
-    display:flex; gap:6px; flex-wrap:wrap; width:100%;
-  }
+  .addToRepeat{ display:flex; gap:6px; flex-wrap:wrap; width:100%; }
   .addToRepeat button{
-    border:none; border-radius:10px;
-    padding:6px 10px; font-size:18px;
-    background:rgba(255,255,255,0.85);
-    cursor:pointer;
+    border:none; border-radius:10px; padding:6px 10px; font-size:18px;
+    background:rgba(255,255,255,0.85); cursor:pointer;
   }
 
-  .block.running{
-    outline:4px solid #FFF200;
-    animation:pulse 0.9s infinite;
-  }
-  @keyframes pulse{
-    0%{transform:scale(1);}
-    50%{transform:scale(1.03);}
-    100%{transform:scale(1);}
-  }
+  .block.running{ outline:4px solid #FFF200; animation:pulse 0.9s infinite; }
+  @keyframes pulse{ 0%{transform:scale(1);} 50%{transform:scale(1.03);} 100%{transform:scale(1);} }
 
-  #lockOverlay{
-    position:fixed; inset:0;
-    background:rgba(255,255,255,0.01);
-    display:none;
-    z-index:5;
-  }
+  #lockOverlay{ position:fixed; inset:0; background:rgba(255,255,255,0.01); display:none; z-index:5; }
   body.locked #lockOverlay{display:block;}
-  body.locked .paletteBtn,
-  body.locked .delBtn,
-  body.locked .stepper button,
-  body.locked .addToRepeat button{
-    pointer-events:none;
-    opacity:0.45;
+  body.locked .paletteBtn, body.locked .delBtn, body.locked .stepper button, body.locked .addToRepeat button{
+    pointer-events:none; opacity:0.45;
   }
   body.locked .block{cursor:default;}
 
   footer{
-    position:fixed;
-    left:0; right:0; bottom:0;
+    position:fixed; left:0; right:0; bottom:0;
     padding:16px 20px calc(16px + env(safe-area-inset-bottom));
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:24px;
-    background:linear-gradient(180deg, rgba(255,246,224,0) 0%, rgba(255,246,224,0.95) 30%);
-    z-index:10;
+    display:flex; align-items:center; justify-content:center; gap:24px;
+    background:linear-gradient(180deg, rgba(255,246,224,0) 0%, rgba(255,246,224,0.95) 30%); z-index:10;
   }
   body.dark-mode footer { background:linear-gradient(180deg, rgba(22,33,62,0) 0%, rgba(22,33,62,0.95) 30%); }
 
   #stopBtn, #runBtn{
-    border:none;
-    border-radius:50%;
-    width:96px; height:96px;
-    font-size:15px;
-    color:#fff;
+    border:none; border-radius:50%; width:96px; height:96px; font-size:15px; color:#fff;
     box-shadow:0 8px 0 rgba(0,0,0,0.15);
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:2px;
-    cursor:pointer;
-    font-family:'Jua',sans-serif;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    cursor:pointer; font-family:'Jua',sans-serif;
   }
   #runBtn{background:radial-gradient(circle at 35% 30%, #6FE39B, #2FA968); }
   #runBtn .emoji{font-size:34px;}
   #runBtn:disabled{background:#cfd6e6; box-shadow:0 8px 0 rgba(0,0,0,0.08); cursor:not-allowed;}
   #runBtn:active:not(:disabled){transform:translateY(6px); box-shadow:0 2px 0 rgba(0,0,0,0.15);}
 
-  #stopBtn{
-    background:radial-gradient(circle at 35% 30%, #FF9C9C, var(--danger));
-    opacity:0.35;
-    pointer-events:none;
-  }
+  #stopBtn{ background:radial-gradient(circle at 35% 30%, #FF9C9C, var(--danger)); opacity:0.35; pointer-events:none; }
   #stopBtn.active{opacity:1; pointer-events:auto;}
   #stopBtn:active.active{transform:translateY(6px); box-shadow:0 2px 0 rgba(0,0,0,0.15);}
   #stopBtn .emoji{font-size:30px;}
 
   #banner{
-    position:fixed;
-    top:70px; left:50%;
-    transform:translateX(-50%) translateY(-140%);
-    background:#fff;
-    border-radius:24px;
-    padding:18px 26px;
-    box-shadow:0 10px 24px rgba(0,0,0,0.18);
-    font-size:20px;
-    text-align:center;
-    max-width:88vw;
-    z-index:20;
-    transition:transform .25s ease;
-    color: #2E3350;
+    position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-140%);
+    background:#fff; border-radius:24px; padding:18px 26px; box-shadow:0 10px 24px rgba(0,0,0,0.18);
+    font-size:20px; text-align:center; max-width:88vw; z-index:20; transition:transform .25s ease; color: #2E3350;
   }
   #banner.show{transform:translateX(-50%) translateY(0);}
   #banner .big{font-size:40px; display:block; margin-bottom:6px;}
 </style>
 
 <script>
+// ROSLIB 임베딩 (변경 없음)
 (function(window) {
   var EventEmitter = function() { this._events = {}; };
   EventEmitter.prototype.on = function(type, listener) {
@@ -386,45 +283,28 @@
     for (var i = 0; i < listeners.length; i++) listeners[i].apply(this, args);
     return true;
   };
-
   var Ros = function(options) {
-    EventEmitter.call(this);
-    this.url = options.url;
-    this.idCounter = 0;
-    this.isConnected = false;
+    EventEmitter.call(this); this.url = options.url; this.idCounter = 0; this.isConnected = false;
     this.socket = new WebSocket(this.url);
-    this.socket.onopen = this._onOpen.bind(this);
-    this.socket.onmessage = this._onMessage.bind(this);
-    this.socket.onerror = this._onError.bind(this);
-    this.socket.onclose = this._onClose.bind(this);
+    this.socket.onopen = this._onOpen.bind(this); this.socket.onmessage = this._onMessage.bind(this);
+    this.socket.onerror = this._onError.bind(this); this.socket.onclose = this._onClose.bind(this);
   };
   Ros.prototype = Object.create(EventEmitter.prototype);
   Ros.prototype._onOpen = function() { this.isConnected = true; this.emit('connection'); };
-  Ros.prototype._onMessage = function(data) {
-    var msg = JSON.parse(data.data);
-    if (msg.op === 'publish') { this.emit(msg.topic, msg.msg); }
-  };
+  Ros.prototype._onMessage = function(data) { var msg = JSON.parse(data.data); if (msg.op === 'publish') { this.emit(msg.topic, msg.msg); } };
   Ros.prototype._onError = function(err) { this.emit('error', err); };
   Ros.prototype._onClose = function(close) { this.isConnected = false; this.emit('close', close); };
   Ros.prototype.close = function() { this.socket.close(); };
   Ros.prototype.callOnConnection = function(message) {
     var self = this;
-    if (!this.isConnected) {
-      setTimeout(function() { self.callOnConnection(message); }, 100);
+    if (!this.isConnected) { setTimeout(function() { self.callOnConnection(message); }, 100);
     } else { this.socket.send(JSON.stringify(message)); }
   };
-
-  var Topic = function(options) {
-    this.ros = options.ros; this.name = options.name; this.messageType = options.messageType;
-  };
+  var Topic = function(options) { this.ros = options.ros; this.name = options.name; this.messageType = options.messageType; };
   Topic.prototype.subscribe = function(callback) {
-    this.ros.on(this.name, callback);
-    this.ros.callOnConnection({ op: 'subscribe', topic: this.name, type: this.messageType });
+    this.ros.on(this.name, callback); this.ros.callOnConnection({ op: 'subscribe', topic: this.name, type: this.messageType });
   };
-  Topic.prototype.publish = function(message) {
-    this.ros.callOnConnection({ op: 'publish', topic: this.name, msg: message });
-  };
-
+  Topic.prototype.publish = function(message) { this.ros.callOnConnection({ op: 'publish', topic: this.name, msg: message }); };
   var Message = function(values) { Object.assign(this, values); };
   window.ROSLIB = { Ros: Ros, Topic: Topic, Message: Message };
 })(window);
@@ -472,7 +352,6 @@
     <ul id="programList">
       <p id="emptyHint">위에서 블록을 눌러 여기에 순서대로 쌓아보세요!</p>
     </ul>
-    
   </section>
 </main>
 
@@ -490,7 +369,9 @@ let running = false;
 let simMode = false;
 let ros = null;
 let progTopic = null, stopTopic = null, stateTopic = null;
-let dragSrcId = null; // 드래그 앤 드롭 소스 ID
+
+let dragSrcId = null; 
+let dragOverPosition = 'bottom'; // 'top' 또는 'bottom'
 
 const listEl = document.getElementById('programList');
 const emptyHint = document.getElementById('emptyHint');
@@ -511,11 +392,7 @@ const OP_META = {
   if:       {emoji:'❓', label:'만약 앞 장애물 발견하면', cls:'if'}
 };
 
-// -----------------------------------------------------
-// 신규 추가: 중첩 드래그 앤 드롭을 위한 데이터 헬퍼 함수
-// -----------------------------------------------------
-
-// 1. 특정 블록을 찾아서 배열에서 뽑아내는 함수 (이동 시 기존 위치에서 제거용)
+// --- [중첩 배열 데이터 처리 헬퍼] ---
 function extractBlock(id, list = program) {
   for (let i = 0; i < list.length; i++) {
     if (list[i].id === id) return list.splice(i, 1)[0];
@@ -527,7 +404,6 @@ function extractBlock(id, list = program) {
   return null;
 }
 
-// 2. 특정 블록 객체 찾기
 function findBlock(id, list = program) {
   for (const b of list) {
     if (b.id === id) return b;
@@ -539,7 +415,6 @@ function findBlock(id, list = program) {
   return null;
 }
 
-// 3. 특정 블록의 부모 리스트(배열)와 인덱스를 반환 (그 블록 위로 삽입할 때 사용)
 function findParentListAndIndex(targetId, list = program) {
   for (let i = 0; i < list.length; i++) {
     if (list[i].id === targetId) return { list, index: i };
@@ -551,12 +426,11 @@ function findParentListAndIndex(targetId, list = program) {
   return null;
 }
 
-// 4. "내가 내 자식(루프) 안으로 들어가는가?" 체크 (무한 에러 방지)
+// 블록 안에 자신을 집어넣어 발생하는 무한 에러 방지
 function isDescendant(parentId, targetId) {
   const parent = findBlock(parentId);
   if (!parent) return false;
   if (parent.id === targetId) return true;
-  
   function check(node) {
     if (node.id === targetId) return true;
     if (node.children) {
@@ -571,46 +445,32 @@ function isDescendant(parentId, targetId) {
 
 function playLaptopBuzzer() {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const notes = [523.25, 659.25, 783.99, 1046.50]; 
-    const duration = 0.08; 
-    notes.forEach((freq, index) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.2, ctx.currentTime + index * duration);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (index + 1) * duration);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + index * duration);
-      osc.stop(ctx.currentTime + (index + 1) * duration);
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (i + 1) * 0.08);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.08); osc.stop(ctx.currentTime + (i + 1) * 0.08);
     });
-  } catch(e) { console.error(e); }
+  } catch(e) {}
 }
 
 function playErrorSound() {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const notes = [493.88, 349.23]; 
-    const duration = 0.15;
-    notes.forEach((freq, index) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.2, ctx.currentTime + index * duration);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (index + 1) * duration);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + index * duration);
-      osc.stop(ctx.currentTime + (index + 1) * duration);
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = 'sawtooth'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (i + 1) * 0.15);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.15); osc.stop(ctx.currentTime + (i + 1) * 0.15);
     });
-  } catch(e) { console.error(e); }
+  } catch(e) {}
 }
 
 function newBlock(op){
@@ -632,7 +492,6 @@ function removeBlock(id, list=program){
 }
 
 function render(){
-  // 기존 리스트 비우고 힌트(가이드 텍스트)만 복구
   listEl.innerHTML = '';
   listEl.appendChild(emptyHint);
   
@@ -644,6 +503,9 @@ function render(){
   }
 }
 
+// -----------------------------------------------------
+// 💡 드래그 앤 드롭 심장부 (블럭 그리기 및 이벤트 할당)
+// -----------------------------------------------------
 function renderBlock(b){
   const meta = OP_META[b.op];
   const li = document.createElement('li');
@@ -667,6 +529,7 @@ function renderBlock(b){
   del.onclick = (e)=>{ e.stopPropagation(); removeBlock(b.id); render(); };
   li.appendChild(del);
 
+  // 컨테이너 블록 (반복문, IF문)
   if (b.op === 'repeat' || b.op === 'if'){
     const childWrap = document.createElement('div');
     childWrap.className = 'repeatChildren';
@@ -684,76 +547,98 @@ function renderBlock(b){
     childWrap.appendChild(addRow);
     li.appendChild(childWrap);
 
-    // [중첩 영역에 드롭 설정]
+    // [중첩 영역으로 드롭]
     childWrap.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.stopPropagation(); // 부모 블럭으로 이벤트가 번지지 않게 함
+      e.preventDefault(); e.stopPropagation(); 
       if (!running && dragSrcId !== null && dragSrcId !== b.id && !isDescendant(dragSrcId, b.id)) {
-        childWrap.classList.add('drag-over');
+        childWrap.classList.add('drag-inside');
       }
     });
-    
     childWrap.addEventListener('dragleave', (e) => {
-      e.stopPropagation();
-      childWrap.classList.remove('drag-over');
+      e.stopPropagation(); childWrap.classList.remove('drag-inside');
     });
-
     childWrap.addEventListener('drop', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      childWrap.classList.remove('drag-over');
-      
+      e.preventDefault(); e.stopPropagation();
+      childWrap.classList.remove('drag-inside');
       if (running || dragSrcId == null || dragSrcId === b.id) return;
-      if (isDescendant(dragSrcId, b.id)) {
-          showBanner('⚠️', '블록을 자신 안에 넣을 수 없어요!', 1500);
-          return;
-      }
+      if (isDescendant(dragSrcId, b.id)) { showBanner('⚠️', '안에 넣을 수 없어요!', 1500); return; }
 
       const draggedBlock = extractBlock(dragSrcId);
       if (draggedBlock) {
-          b.children.push(draggedBlock); // 현재 루프 블록의 맨 끝에 삽입
+          b.children.push(draggedBlock); 
           render();
       }
       dragSrcId = null;
     });
   }
 
-  // [블럭 자체에 드롭 설정 (블럭 사이에 끼워넣기)]
+  // [블럭 자체 드래그 시작] 💡 커서 고정(Ghost) 및 투명화
   li.addEventListener('dragstart', (e)=>{ 
     if(running) { e.preventDefault(); return; }
     e.stopPropagation();
     li.classList.add('dragging'); 
     dragSrcId = b.id; 
+
+    // 깔끔한 커스텀 드래그 유령 이미지 생성
+    const ghost = document.createElement('div');
+    ghost.style.position = 'absolute'; ghost.style.top = '-1000px';
+    ghost.style.background = getComputedStyle(li).backgroundColor;
+    ghost.style.color = '#fff'; ghost.style.padding = '10px 18px';
+    ghost.style.borderRadius = '16px'; ghost.style.fontFamily = "'Jua', sans-serif";
+    ghost.style.fontSize = '18px'; ghost.style.boxShadow = 'var(--shadow)';
+    ghost.textContent = meta.emoji + ' ' + meta.label;
+    document.body.appendChild(ghost);
+    
+    // 마우스 커서를 블록의 좌측 상단 (20px, 20px)에 정확히 고정시킵니다.
+    e.dataTransfer.setDragImage(ghost, 20, 20);
+    setTimeout(() => document.body.removeChild(ghost), 0);
   });
   
   li.addEventListener('dragend', (e)=> {
     e.stopPropagation();
     li.classList.remove('dragging');
+    document.querySelectorAll('.drag-top, .drag-bottom').forEach(el => el.classList.remove('drag-top', 'drag-bottom'));
     dragSrcId = null;
   });
   
+  // [블럭 사이사이 드롭선 표시]
   li.addEventListener('dragover', (e)=>{ 
-    e.preventDefault(); 
+    e.preventDefault(); e.stopPropagation();
+    if (running || dragSrcId == null || dragSrcId === b.id || isDescendant(dragSrcId, b.id)) return;
+
+    const rect = li.getBoundingClientRect();
+    const offsetY = e.clientY - rect.top;
+    let headerHeight = (b.op === 'repeat' || b.op === 'if') ? 60 : rect.height; // 헤더 부분 기준 계산
+
+    li.classList.remove('drag-top', 'drag-bottom');
+    if (offsetY < headerHeight / 2) {
+        li.classList.add('drag-top');
+        dragOverPosition = 'top';
+    } else if (offsetY <= headerHeight) {
+        li.classList.add('drag-bottom');
+        dragOverPosition = 'bottom';
+    }
+  });
+
+  li.addEventListener('dragleave', (e)=>{
     e.stopPropagation();
+    li.classList.remove('drag-top', 'drag-bottom');
   });
   
   li.addEventListener('drop', (e)=>{
-    e.preventDefault();
-    e.stopPropagation();
-    if (running || dragSrcId == null || dragSrcId === b.id) return;
+    e.preventDefault(); e.stopPropagation();
+    li.classList.remove('drag-top', 'drag-bottom');
     
-    // 블럭을 자신 내부의 하위 블럭 위로 떨어뜨릴 때의 무한 루프 방지
-    if (isDescendant(dragSrcId, b.id)) {
-        showBanner('⚠️', '블록을 자신 안에 넣을 수 없어요!', 1500);
-        return;
-    }
+    if (running || dragSrcId == null || dragSrcId === b.id) return;
+    if (isDescendant(dragSrcId, b.id)) { showBanner('⚠️', '자신 안에 넣을 수 없어요!', 1500); return; }
 
     const draggedBlock = extractBlock(dragSrcId);
     if (draggedBlock) {
         const targetInfo = findParentListAndIndex(b.id);
         if (targetInfo) {
-            // 내가 드롭한 블럭 "바로 위"에 쏙 끼워넣기
-            targetInfo.list.splice(targetInfo.index, 0, draggedBlock);
+            let insertIdx = targetInfo.index;
+            if (dragOverPosition === 'bottom') insertIdx += 1;
+            targetInfo.list.splice(insertIdx, 0, draggedBlock); // 파란 선 위치에 정확히 삽입
         } else {
             program.push(draggedBlock);
         }
@@ -765,17 +650,14 @@ function renderBlock(b){
   return li;
 }
 
-// 메인 빈 화면 영역(바탕)에 떨어뜨렸을 때 최상위 리스트 맨 끝으로 보내는 로직
-listEl.addEventListener('dragover', (e) => {
-  e.preventDefault();
-});
+// 메인 빈 리스트 배경 드롭 처리 (가장 맨 끝으로 이동)
+listEl.addEventListener('dragover', (e) => { e.preventDefault(); });
 listEl.addEventListener('drop', (e) => {
   e.preventDefault();
   if (running || dragSrcId == null) return;
-  
   const draggedBlock = extractBlock(dragSrcId);
   if (draggedBlock) {
-      program.push(draggedBlock); // 메인 프로그램 리스트 끝에 추가
+      program.push(draggedBlock); 
       render();
   }
   dragSrcId = null;
@@ -823,16 +705,7 @@ function setLocked(locked){
   stopBtn.classList.toggle('active', locked);
 }
 
-function clearHighlights(){
-  document.querySelectorAll('.block.running').forEach(el=>el.classList.remove('running'));
-}
-
-function highlightById(id){
-  clearHighlights();
-  if(!id) return;
-  const target = document.querySelector(`.block[data-id="${id}"]`);
-  if (target) target.classList.add('running');
-}
+function clearHighlights(){ document.querySelectorAll('.block.running').forEach(el=>el.classList.remove('running')); }
 
 function showBanner(emoji, text, ms=2200){
   bannerEl.innerHTML = `<span class="big">${emoji}</span>${text}`;
@@ -847,9 +720,7 @@ function highlightActiveBlock(op) {
   clearHighlights();
   if (!op) return;
   const blocks = document.querySelectorAll(`.block.b-${op}`);
-  if (blocks.length > 0) {
-    blocks[0].classList.add('running');
-  }
+  if (blocks.length > 0) blocks[0].classList.add('running');
 }
 
 function handleRunState(s){
@@ -948,8 +819,7 @@ function connectRos(url){
     stopTopic = new ROSLIB.Topic({ ros, name:'/run_stop', messageType:'std_msgs/msg/Bool' });
     stateTopic = new ROSLIB.Topic({ ros, name:'/run_state', messageType:'std_msgs/msg/String' });
     stateTopic.subscribe((msg)=>{
-      try{ handleRunState(JSON.parse(msg.data)); }
-      catch(e){ console.error('run_state 파싱 오류', e); }
+      try{ handleRunState(JSON.parse(msg.data)); } catch(e){}
     });
   });
   ros.on('error', ()=>{ connStateEl.textContent = '연결 오류'; connStateEl.className = 'bad'; });
@@ -961,9 +831,8 @@ function connectRos(url){
 }
 
 // -----------------------------------------------------
-// 신규 추가 기능 (UI 겹침 방지 및 완벽 통합)
+// 부가 UI 기능 (다크모드, 불러오기 등)
 // -----------------------------------------------------
-
 const darkModeBtn = document.getElementById('darkModeBtn');
 darkModeBtn.addEventListener('click', () => {
   document.body.classList.toggle('dark-mode');
@@ -987,18 +856,13 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   const data = JSON.stringify(serializeProgram(program), null, 2);
   const blob = new Blob([data], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'robot_program.json';
-  a.click();
+  const a = document.createElement('a'); a.href = url; a.download = 'robot_program.json'; a.click();
   showBanner('📥', '파일로 저장되었습니다!', 1500);
 });
 
-document.getElementById('importBtn').addEventListener('click', () => {
-  document.getElementById('fileInput').click();
-});
+document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('fileInput').click(); });
 document.getElementById('fileInput').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if(!file) return;
+  const file = e.target.files[0]; if(!file) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
     try {
@@ -1013,29 +877,21 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
           return nb;
         });
       }
-      program = rebuild(parsed);
-      render();
-      showBanner('📤', '프로그램을 불러왔습니다!', 1500);
-    } catch(err) {
-      showBanner('❌', '파일 형식이 잘못되었습니다.', 2000);
-    }
+      program = rebuild(parsed); render(); showBanner('📤', '프로그램을 불러왔습니다!', 1500);
+    } catch(err) { showBanner('❌', '파일 형식이 잘못되었습니다.', 2000); }
     e.target.value = ''; 
   };
   reader.readAsText(file);
 });
 
-// 브라우저 로컬 저장소 자동저장 (Debounce 적용)
 let saveTimer;
 const oldRender = render;
 render = function() {
   oldRender();
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    localStorage.setItem('robot_blocks', JSON.stringify(serializeProgram(program)));
-  }, 500); 
+  saveTimer = setTimeout(() => { localStorage.setItem('robot_blocks', JSON.stringify(serializeProgram(program))); }, 500); 
 };
 
-// 시작 시 자동 로드
 window.addEventListener('load', () => {
   const data = localStorage.getItem('robot_blocks');
   if (data) {
@@ -1051,25 +907,11 @@ window.addEventListener('load', () => {
           return nb;
         });
       }
-      program = rebuild(parsed);
-      oldRender(); 
+      program = rebuild(parsed); oldRender(); 
     } catch(e) {}
   }
 });
 
-// PWA 모바일 설치 지원
-const manifest = {
-  name: "로봇 블록 놀이터", short_name: "로봇블록", start_url: ".", display: "standalone",
-  background_color: "#BFE8FF", theme_color: "#4C8DFF",
-  icons: [{ src: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSI4MCIgZm9udC1zaXplPSI4MCI+8J+krjwvdGV4dD48L3N2Zz4=", sizes: "192x192", type: "image/svg+xml" }]
-};
-const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-const linkTag = document.createElement('link'); 
-linkTag.rel = 'manifest'; 
-linkTag.href = URL.createObjectURL(manifestBlob);
-document.head.appendChild(linkTag);
-
-// 최초 렌더링
 render();
 </script>
 </body>
