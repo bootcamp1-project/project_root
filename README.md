@@ -390,8 +390,8 @@ source install/setup.bash
 터틀봇 라즈베리파이에서 기본 노드를 실행합니다.
 
 ```bash
-export TURTLEBOT3_MODEL=burger
 cd ~/ros2_ws
+export TURTLEBOT3_MODEL=burger
 ros2 launch turtlebot3_bringup robot.launch.py
 ```
 
