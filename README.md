@@ -344,7 +344,7 @@ project_root/
 ## Hardware
 
 - TurtleBot3 Burger
-- LDS-01 / LDS-02 LiDAR
+- LDS-03 LiDAR
 - OpenCR
 
 ## ROS2 Package
@@ -391,7 +391,7 @@ source install/setup.bash
 
 ```bash
 export TURTLEBOT3_MODEL=burger
-
+cd ~/ros2_ws
 ros2 launch turtlebot3_bringup robot.launch.py
 ```
 
@@ -402,6 +402,7 @@ ros2 launch turtlebot3_bringup robot.launch.py
 웹 애플리케이션과 ROS2를 연결하기 위해 rosbridge_server를 실행합니다.
 
 ```bash
+cd ~/ros2_ws
 ros2 launch rosbridge_server rosbridge_websocket_launch.xml
 ```
 
@@ -414,8 +415,8 @@ ros2 launch rosbridge_server rosbridge_websocket_launch.xml
 PC에서 Interpreter 및 센서 노드를 실행합니다.
 
 ```bash
+cd ~/ros2_ws
 source ~/ros2_ws/install/setup.bash
-
 ros2 launch block_robot bringup.launch.py
 ```
 
@@ -433,7 +434,11 @@ ros2 launch block_robot bringup.launch.py
 
 ```bash
 cd ~/ros2_ws/src/block_robot/web
-
+python3 -m http.server 8000
+```
+디렉토리가 다르다면 수동으로 접속하여
+```bash
+cd ~/[본인 디렉토리]/web
 python3 -m http.server 8000
 ```
 
