@@ -110,6 +110,7 @@ LiDAR
 | Highlight | ✅ |
 | Emergency Stop | ✅ |
 | LiDAR 감지 | ✅ |
+| Ai블록코딩 | ✅ |
 
 ---
 
