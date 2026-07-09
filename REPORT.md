@@ -126,7 +126,7 @@
 | Highlight | ✅ |
 | Emergency Stop | ✅ |
 | LiDAR 감지 | ✅ |
-| AI블록코딩 생 | ✅ |
+| AI블록코딩 test | ✅ |
 
 ---
 
@@ -137,7 +137,7 @@
 | 박준서 | 프로젝트 관리 | 일정 관리 및 프로젝트 총괄 |
 | **박정호** | **Full Stack 개발** | **웹 UI 설계, ROS2 연동, Runtime Interpreter 구현, JSON Tree 설계, 시스템 통합, 테스트 및 문서화** |
 | 김건호 | AI, Web | 블록 편집기 구현 |
-| 윤태환 | ROS2 | 주행 제어 및 Interpreter 보조 |
+| 윤태환 | ROS2, 문서 유지 보수 및 첨삭 | 주행 제어 및 Interpreter 보조 |
 | 김민찬 | Hardware | LiDAR 및 부저 제어 |
 | 김성수 | Integration | 빌드 및 통합 테스트 |
 
@@ -203,6 +203,7 @@
 | Highlight | ✅ |
 | Emergency Stop | ✅ |
 | LiDAR | ✅ |
+| AI블록코딩 | ✅ |
 
 모든 필수 기능이 정상적으로 동작하는 것을 확인하였다.
 
