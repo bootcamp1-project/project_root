@@ -469,6 +469,7 @@ Stack 기반 실행 구조로 변경하였다.
 - Highlight
 - Emergency Stop
 - LiDAR 기반 장애물 감지
+- Ai 블록 코딩 Assistant
 
 ---
 
