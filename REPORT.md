@@ -26,6 +26,8 @@
 
 또한 LiDAR 기반 장애물 감지 기능과 Runtime Skip 구조를 적용하여 장애물이 감지되면 현재 이동 블록만 중단하고 다음 실행 흐름으로 자연스럽게 이어지도록 구현하였다.
 
+추가로 AI 자연어 기반 블록 생성 기능을 추가하여 사용자가 원하는 로봇 동작을 프롬프트로 입력하면 자동으로 JSON Tree 형태의 블록 프로그램을 생성할 수 있도록 구현하였다.
+
 ---
 
 # 3. 개발 목표
@@ -38,32 +40,39 @@
 - 반복문 및 조건문의 중첩 구조 지원
 - LiDAR 기반 안전 주행
 - 웹과 로봇의 실시간 상태 동기화
+- AI 기반 자연어 블록 프로그램 생성 기능 제공
 
 ---
 
 # 4. 시스템 구성
 
 ```text
-Web Browser
-      │
-      ▼
-rosbridge_server
-      │
-      ▼
-Interpreter Node
-      │
- ┌────┼────┐
- │    │    │
- ▼    ▼    ▼
-cmd_vel
-run_state
-buzzer
-      ▲
-      │
-Ultrasonic Node
-      ▲
-      │
-LiDAR
+                 User
+                  │
+                  ▼
+             AI Block Panel
+                  │
+                  ▼
+              AI Service
+                  │
+             JSON Tree 생성
+                  │
+                  ▼
+
+              Web Browser
+                  │
+                  ▼
+          rosbridge_server
+                  │
+                  ▼
+          Interpreter Node
+                  │
+        ┌─────────┼─────────┐
+        ▼         ▼         ▼
+    cmd_vel   run_state   buzzer
+        │
+        ▼
+   TurtleBot3
 ```
 
 ---
@@ -94,6 +103,13 @@ LiDAR
 - Runtime Skip
 - Emergency Stop
 
+## 5.5 AI 블록 코딩 도우미
+
+- 자연어 기반 프로그램 생성
+- Prompt 분석
+- JSON Tree 자동 생성
+- Blockly Workspace 반영
+
 ---
 
 # 6. 구현 결과
@@ -110,7 +126,7 @@ LiDAR
 | Highlight | ✅ |
 | Emergency Stop | ✅ |
 | LiDAR 감지 | ✅ |
-| Ai블록코딩 | ✅ |
+| AI블록코딩 생 | ✅ |
 
 ---
 
@@ -151,7 +167,7 @@ LiDAR
 
 - 반복문 및 조건문 구현
 - Nested Block 지원
-- 블럭 코딩 Ai 활용기능 추가
+- 블럭 코딩 AI 활용기능 추가
 - 사용자 테스트
 
 ### Day 5
@@ -212,10 +228,12 @@ LiDAR
 - 다양한 ROS2 기반 로봇 지원
 
 
-# 개인 KPT — 박정호 (Full Stack 개발)
+# 12. 개인 KPT 
+
+# 12.1 박정호 (Full Stack 개발)
 
 ## Keep (잘한 점 / 유지할 점)
-- 웹 UI부터 ROS2 연동, Runtime Interpreter까지 프로젝트 전반의 기술 스택을 혼자 설계·구현하며 시스템을 일관성 있게 유지했다.
+- 웹 UI부터 ROS2 연동, Runtime Interpreter까지 프로젝트 주요 기술 영역(Web, ROS2, Interpreter)의 설계와 구현을 담당하며 시스템 통합을 주도하였다.
 - JSON Tree 구조를 직접 설계해 블록 코딩 UI와 ROS2 Interpreter 간 데이터 교환을 명확하게 정의했다.
 - Stack 기반 Runtime Parsing을 구현해 반복문·조건문의 중첩 구조를 안정적으로 지원했다.
 - 여러 모듈(Web, ROS2, Interpreter)을 오가며 시스템 통합을 주도해, 팀 전체 개발 속도를 유지하는 데 기여했다.
@@ -236,7 +254,7 @@ LiDAR
 
 ---
 
-# 개인 KPT — 윤태환
+# 12.2 윤태환
 
 ## Keep (잘한 점 / 유지할 점)
 - 프로젝트 발표 자료(PPT) 제작을 지원하며 핵심 내용을 이해하기 쉽도록 구성하는 데 기여했다.
@@ -257,7 +275,7 @@ LiDAR
 
 ---
 
-# 12. 결론
+# 13. 결론
 
 본 프로젝트를 통해 웹 기반 블록 코딩 환경과 ROS 2 기반 TurtleBot3를 연동한 교육용 로봇 플랫폼을 구현하였다.
 
