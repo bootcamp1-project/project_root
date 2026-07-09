@@ -5,6 +5,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Bool, Float32
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Range
 
 OBSTACLE_M = 0.20      # 장애물 제한 거리 (20cm)
 TURN_90_SEC = 3.4      # 90도 회전 시간
@@ -21,6 +22,13 @@ class InterpreterNode(Node):
         self.sub_front = self.create_subscription(Float32, '/obstacle_dist/front', self.on_dist_front, 10)
         self.sub_rear = self.create_subscription(Float32, '/obstacle_dist/rear', self.on_dist_rear, 10)
         
+        # [수정] 웹에서 일괄 처리하던 안전 감지를 Backend로 이관. Race Condition 방지용 다중 센서 구독 추가.
+        self.sub_obs1 = self.create_subscription(Bool, '/obstacle', self.on_bool_obstacle, 10)
+        self.sub_obs2 = self.create_subscription(Bool, '/front_obstacle', self.on_bool_obstacle, 10)
+        self.sub_obs3 = self.create_subscription(Bool, '/obstacle_detected', self.on_bool_obstacle, 10)
+        self.sub_range1 = self.create_subscription(Range, '/range', self.on_range_obstacle, 10)
+        self.sub_range2 = self.create_subscription(Range, '/ultrasonic_range', self.on_range_obstacle, 10)
+        
         self.pub_vel = self.create_publisher(Twist, '/cmd_vel', 10)
         self.pub_buzzer = self.create_publisher(Bool, '/buzzer', 10)
         self.pub_state = self.create_publisher(String, '/run_state', 10)
@@ -29,12 +37,26 @@ class InterpreterNode(Node):
         self.remain = 0.0        
         self.cur = None          
         
-        self.dist_front = 999.0  
-        self.dist_rear = 999.0   
+        self.dist_front_float = 999.0  
+        self.dist_front_range = 999.0
+        self.obs_bool = False
+        
+        self.dist_rear_float = 999.0   
         self.is_running = False  
         
         self.timer = self.create_timer(0.1, self.tick)
         self.get_logger().info('★ [통합 패치 완료] 웹 프론트엔드 v5 규격 반영 및 실시간 트리 런타임 엔진')
+
+    @property
+    def dist_front(self):
+        """다중 센서 간의 값 덮어쓰기 버그를 방지하고 통합된 거리 값 제공"""
+        if self.obs_bool:
+            return 0.0
+        return min(self.dist_front_float, self.dist_front_range)
+
+    @property
+    def dist_rear(self):
+        return self.dist_rear_float
 
     def send_state(self, status, **kwargs):
         msg = String()
@@ -57,18 +79,25 @@ class InterpreterNode(Node):
             self.abort('데이터 오류')
 
     def on_stop(self, msg):
+        # [수정] 사용자의 수동 개입은 항시 '사용자 중지'로 명확히 처리합니다.
         if not (msg.data and self.is_running):
             return
-        if self.dist_front < OBSTACLE_M or self.dist_rear < OBSTACLE_M:
-            self.abort('장애물 감지')
-        else:
-            self.abort('사용자 중지')
+        self.abort('사용자 중지')
 
     def on_dist_front(self, msg):
-        self.dist_front = float(msg.data)
+        self.dist_front_float = float(msg.data)
         
     def on_dist_rear(self, msg):
-        self.dist_rear = float(msg.data)
+        self.dist_rear_float = float(msg.data)
+
+    def on_bool_obstacle(self, msg):
+        self.obs_bool = msg.data
+
+    def on_range_obstacle(self, msg):
+        if msg.range <= OBSTACLE_M:
+            self.dist_front_range = msg.range
+        else:
+            self.dist_front_range = msg.range # 정상 추적 유지
 
     def abort(self, reason):
         if not self.is_running:
@@ -81,20 +110,38 @@ class InterpreterNode(Node):
         self.pub_vel.publish(Twist())
         self.send_state('aborted', reason=reason)
 
-    def next_is_obstacle_if(self):
-        """대기열의 바로 다음 블록이 '만약 앞 장애물' 조건 블록인지 확인합니다."""
+    def peek_next_command(self):
+        """[수정] 대기열(self.program)에서 반복문 내부까지 풀어가며 실제 다음에 실행될 명령어를 깊이 탐색"""
         if not self.program:
-            return False
-        nxt = self.program[0]
-        return nxt.get('op') == 'if' and nxt.get('cond') == 'front_obstacle'
+            return None
+        temp_prog = json.loads(json.dumps(self.program))
+        while temp_prog:
+            b = temp_prog[0]
+            op = b.get('op')
+            if op == 'repeat':
+                temp_prog.pop(0)
+                count = int(b.get('count', 1))
+                if count > 0:
+                    blocks = b.get('blocks', [])
+                    unrolled = []
+                    for _ in range(count):
+                        unrolled.extend(json.loads(json.dumps(blocks)))
+                    temp_prog = unrolled + temp_prog
+                continue
+            return b
+        return None
+
+    def next_is_obstacle_if(self):
+        """실제 다음 블록이 '만약 앞 장애물' 조건 블록인지 정확히 탐색합니다."""
+        nxt = self.peek_next_command()
+        return nxt is not None and nxt.get('op') == 'if' and nxt.get('cond') == 'front_obstacle'
 
     def next_block(self):
-        """반복문 내부에 IF문이나 다른 제어 블록이 중첩되어도 런타임에 실시간으로 해석합니다."""
+        """런타임에 실시간으로 해석합니다."""
         while self.program:
             block = self.program.pop(0)
             op = block.get('op')
             
-            # 1. 런타임 반복문 해석: 자식 블록들(blocks)을 개수만큼 복사하여 대기열 맨 앞에 주입
             if op == 'repeat':
                 count = int(block.get('count', 1))
                 inner_blocks = block.get('blocks', [])
@@ -104,11 +151,10 @@ class InterpreterNode(Node):
                 self.program = unrolled + self.program
                 continue
                 
-            # 2. 런타임 IF문 해석: 웹의 직렬화 데이터 규격인 'then' 항목을 추출하여 대기열 주입
             elif op == 'if':
                 cond = block.get('cond')
                 if cond == 'front_obstacle' and self.dist_front < OBSTACLE_M:
-                    then_blocks = block.get('then', [])  # v5 웹 규격인 'then'과 완벽 동기화
+                    then_blocks = block.get('then', [])  
                     self.program = json.loads(json.dumps(then_blocks)) + self.program
                 continue
 
@@ -122,7 +168,6 @@ class InterpreterNode(Node):
                 self.send_state('done')
             return
 
-        # 동작 시간 세팅
         op = self.cur['op']
         if op in ('forward', 'backward'):
             self.remain = float(self.cur.get('sec', 3.0))
@@ -149,10 +194,9 @@ class InterpreterNode(Node):
         if self.cur is not None:
             op = self.cur['op']
             
-            # 주행 중 장애물 실시간 가로채기 제어 제어
             if op == 'forward' and self.dist_front < OBSTACLE_M:
                 self.pub_vel.publish(Twist())
-                if self.next_is_obstacle_if():  # 안전하고 정교한 내장 조건 감시 함수 적용
+                if self.next_is_obstacle_if(): 
                     self.get_logger().warn(f"⚠️ [주행 중 탈출] 전방 장애물 감지! IF 블록으로 제어를 넘깁니다. (거리: {self.dist_front:.2f}m)")
                     self.cur = None
                     return
@@ -163,16 +207,10 @@ class InterpreterNode(Node):
                     
             elif op == 'backward' and self.dist_rear < OBSTACLE_M:
                 self.pub_vel.publish(Twist())
-                if self.next_is_obstacle_if():
-                    self.get_logger().warn(f"⚠️ [주행 중 탈출] 후방 장애물 감지! IF 블록으로 제어를 넘깁니다. (거리: {self.dist_rear:.2f}m)")
-                    self.cur = None
-                    return
-                else:
-                    self.get_logger().warn(f"🛑 후방 장애물 감지! IF 블록이 없어 프로그램을 정지합니다. (거리: {self.dist_rear:.2f}m)")
-                    self.abort('장애물 감지')
-                    return
+                self.get_logger().warn(f"🛑 후방 장애물 감지! 프로그램을 정지합니다. (거리: {self.dist_rear:.2f}m)")
+                self.abort('장애물 감지')
+                return
 
-            # 모터 속도 설정
             if op == 'forward': cmd.linear.x = LINEAR_SPEED
             elif op == 'backward': cmd.linear.x = -LINEAR_SPEED
             elif op == 'turn_left': cmd.angular.z = ANGULAR_SPEED
