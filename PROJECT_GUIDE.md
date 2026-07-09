@@ -113,13 +113,11 @@ ros2 launch turtlebot3_bringup robot.launch.py
 
 ---
 
-# 7. rosbridge_server 실행
+# 7. Block Robot Bringup
 
-웹과 ROS2 통신을 위해 rosbridge를 실행한다.
+웹과 ROS2 통신을 위한 rosbridge_server는 bringup.launch.py 실행 시 자동으로 실행된다.
 
-```bash
-ros2 launch rosbridge_server rosbridge_websocket_launch.xml
-```
+별도의 rosbridge 실행 과정은 필요하지 않다.
 
 기본 포트
 
@@ -137,16 +135,19 @@ ws://<PC_IP>:9090
 
 # 8. Block Robot 실행
 
-새 터미널에서
+새 터미널에서 실행한다.
 
 ```bash
-source ~/ros2_ws/install/setup.bash
+cd ~/ros2_ws
+
+source install/setup.bash
 
 ros2 launch block_robot bringup.launch.py
 ```
 
 실행되는 노드
 
+- rosbridge_server
 - interpreter_node
 - ultrasonic_node
 - buzzer_node
@@ -188,31 +189,28 @@ http://192.168.xxx.xxx:8000/blocks.html
 반드시 아래 순서를 따른다.
 
 ```text
-① TurtleBot3
+① TurtleBot3 Bringup
 
 ↓
 
-② rosbridge_server
+② Block Robot Bringup
+   (rosbridge_server 자동 실행)
 
 ↓
 
-③ bringup.launch.py
+③ HTTP Server
 
 ↓
 
-④ HTTP Server
+④ Browser 접속
 
 ↓
 
-⑤ Browser
+⑤ Connect
 
 ↓
 
-⑥ Connect
-
-↓
-
-⑦ Program Execute
+⑥ Program Execute
 ```
 
 ---
@@ -262,11 +260,23 @@ TurtleBot3 종료
 
 Execute 버튼을 누르면
 
-JSON Tree
+AI Prompt
 
 ↓
 
-rosbridge
+AI Service
+
+↓
+
+JSON Tree 
+
+↓
+
+Blockly Workspace
+
+↓
+
+rosbridge_server
 
 ↓
 
@@ -295,7 +305,23 @@ cmd_vel = 0
 # 14. 시스템 구성
 
 ```text
-Web Browser
+User
+
+↓
+
+AI Panel
+
+↓
+
+AI Service
+
+↓
+
+JSON Tree
+
+↓
+
+Web Application
 
 ↓
 
@@ -303,7 +329,7 @@ rosbridge_server
 
 ↓
 
-Interpreter
+Interpreter Node
 
 ↓
 
@@ -481,4 +507,5 @@ source install/setup.bash
 | v1.1 | rosbridge 추가 |
 | v1.2 | Runtime Interpreter 추가 |
 | v1.3 | LiDAR 및 Runtime Skip 추가 |
-| v1.4 | 최종 운영 문서 |
+| v1.4 | AI 코딩 보조 기능 추가 및 실행 과정 변경 |
+| v1.5 | 최종 운영 문서 |
