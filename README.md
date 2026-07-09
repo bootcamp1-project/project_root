@@ -461,24 +461,23 @@ http://192.168.xxx.xxx:8000/blocks.html
 
 ↓
 
-② rosbridge_server
+② Block Robot Bringup
+   (rosbridge_server 자동 실행)
 
 ↓
 
-③ block_robot Bringup
+③ Web Server
 
 ↓
 
-④ Web Server
+④ Browser 접속
 
 ↓
 
-⑤ Browser 접속
+⑤ 프로그램 실행
 
-↓
-
-⑥ 프로그램 실행
 ```
+
 
 ---
 
