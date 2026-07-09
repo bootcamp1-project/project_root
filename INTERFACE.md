@@ -694,8 +694,9 @@ Interpreter 실행
 | v1.1     | JSON Tree 구조 추가                                  |
 | v1.2     | Runtime Interpreter 명세 추가                        |
 | v1.3     | Runtime Skip 및 장애물 처리 명세 추가                      |
-| v1.4     | 최종 인터페이스 문서 정리                                   |
-| v1.5 | AI Panel 기반 자연어 → Blockly JSON Tree 생성 기능 추가 |
+| v1.4 | AI Panel 기반 자연어 → Blockly JSON Tree 생성 기능 추가 |
+| v1.5     | 최종 인터페이스 문서 정리                                   |
+
 
 ---
 
