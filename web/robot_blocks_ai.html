@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>로봇 블록 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky-top: #BFE8FF;
+    --sky-bot: #FFF6E0;
+    --ink: #2E3350;
+    --card: #FFFFFF;
+    --forward: #3FB27F;
+    --backward: #FF70B8;
+    --turn: #4C8DFF;
+    --buzzer: #FFC93C;
+    --wait: #A784FF;
+    --repeat: #FF7A59;
+    --if-cls: #FF4B4B;
+    --danger: #FF4B4B;
+    --shadow: 0 6px 0 rgba(0,0,0,0.12);
+  }
+
+  body.dark-mode {
+    --sky-top: #1a1a2e;
+    --sky-bot: #16213e;
+    --ink: #f5f6fa;
+    --card: rgba(30, 30, 46, 0.85);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Gaegu','Jua',sans-serif;
+    background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bot) 100%);
+    color:var(--ink);
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    overscroll-behavior:none;
+    -webkit-tap-highlight-color: transparent;
+    user-select:none;
+    overflow: hidden;
+    transition: background 0.3s ease;
+  }
+  h1,h2,.title-font{font-family:'Jua',sans-serif;}
+
+  header{
+    padding:16px 20px 8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-shrink: 0;
+  }
+  header h1{ margin:0; font-size:26px; color:var(--ink); }
+  
+  #connState{
+    font-size:14px; padding:6px 14px; border-radius:20px;
+    background:#fff; box-shadow:var(--shadow);
+  }
+  #connState.ok{background:#DFFFEA; color:#2E3350;}
+  #connState.bad{background:#FFE3E3; color:#2E3350;}
+  body.dark-mode #connState { background: #333; color: #fff; }
+
+  #connectPanel{
+    display:flex; gap:8px; align-items:center;
+    background:rgba(255,255,255,0.6);
+    padding:10px 14px; border-radius:16px;
+    margin:0 16px 10px; font-size:14px;
+    flex-wrap:wrap; flex-shrink: 0;
+    transition: background 0.3s ease;
+  }
+  body.dark-mode #connectPanel { background: rgba(30, 30, 46, 0.75); }
+  
+  #connectPanel input{
+    flex:1; min-width:140px; padding:8px 10px; border-radius:10px;
+    border:1px solid #cfd6e6; font-size:14px;
+  }
+  body.dark-mode #connectPanel input { background: #2a2a3b; color: #fff; border-color: #444; }
+
+  #connectPanel button{
+    padding:8px 14px; border-radius:10px; border:none;
+    background:var(--turn); color:#fff; cursor:pointer;
+  }
+  #simToggle{
+    padding:8px 12px; border-radius:10px; border:none; cursor:pointer;
+    background:#EDE7FF; color:#5b4b9c; font-size:13px;
+  }
+  #simToggle.on{background:#A784FF; color:#fff;}
+
+  #aiPanel{
+    display:flex; flex-direction:column; gap:8px;
+    background:rgba(255,255,255,0.68);
+    padding:12px 14px; border-radius:18px;
+    margin:0 16px 10px; flex-shrink:0;
+    box-shadow:0 4px 0 rgba(0,0,0,0.06);
+    transition: background 0.3s ease;
+  }
+  body.dark-mode #aiPanel{ background:rgba(30, 30, 46, 0.78); }
+  .aiTitle{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    gap:10px; flex-wrap:wrap;
+  }
+  .aiTitle strong{font-family:'Jua',sans-serif; font-size:17px;}
+  .aiTitle small{color:#6f7790; font-size:13px;}
+  body.dark-mode .aiTitle small{color:#c5c8d8;}
+  #aiPrompt{
+    width:100%; min-height:48px; max-height:110px; resize:vertical;
+    border:1px solid #cfd6e6; border-radius:14px;
+    padding:10px 12px; font-size:16px; font-family:'Gaegu',sans-serif;
+    outline:none; color:#2E3350;
+  }
+  #aiPrompt:focus{border-color:var(--turn); box-shadow:0 0 0 3px rgba(76,141,255,0.16);}
+  body.dark-mode #aiPrompt{background:#2a2a3b; color:#fff; border-color:#444;}
+  .aiControls{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .aiControls button, .aiChip{
+    border:none; border-radius:12px; padding:8px 12px;
+    cursor:pointer; font-family:'Jua',sans-serif; font-size:14px;
+  }
+  #aiGenerateBtn{background:#6FE39B; color:#174b2f;}
+  #aiReplaceBtn{background:#4C8DFF; color:#fff;}
+  #aiClearBtn{background:#FFE3E3; color:#9b2424;}
+  .aiChip{background:#fff; color:#4b5470; box-shadow:0 2px 0 rgba(0,0,0,0.08);}
+  body.dark-mode .aiChip{background:#33374f; color:#fff;}
+  #aiResult{
+    display:none; background:rgba(46,51,80,0.06); border-radius:14px;
+    padding:8px 10px; font-size:14px; line-height:1.45;
+  }
+  body.dark-mode #aiResult{background:rgba(255,255,255,0.08);}
+  .aiPreviewBlock{
+    display:inline-flex; align-items:center; gap:4px;
+    margin:3px 4px 3px 0; padding:5px 8px;
+    background:#fff; color:#2E3350; border-radius:999px;
+    font-size:13px;
+  }
+  body.dark-mode .aiPreviewBlock{background:#33374f; color:#fff;}
+
+
+  main{
+    flex:1; display:flex; flex-direction:column;
+    gap:14px; padding:0 16px 140px; overflow: hidden;
+  }
+
+  #palette{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr));
+    gap:10px; background:rgba(255,255,255,0.6);
+    padding:12px; border-radius:20px; flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+  body.dark-mode #palette { background: rgba(30, 30, 46, 0.75); }
+
+  .paletteBtn{
+    min-height:72px; border:none; border-radius:18px;
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:4px; font-size:14px;
+    font-family:'Gaegu',sans-serif; color:#fff;
+    cursor:pointer; box-shadow:var(--shadow); transition:transform .08s ease;
+  }
+  .paletteBtn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,0.12);}
+  .paletteBtn .emoji{font-size:30px;}
+  
+  .pb-forward{background:var(--forward);}
+  .pb-backward{background:var(--backward);}
+  .pb-turn_left{background:var(--turn);}
+  .pb-turn_right{background:var(--turn);}
+  .pb-buzzer{background:var(--buzzer); color:#5b4600;}
+  .pb-wait{background:var(--wait);}
+  .pb-repeat{background:var(--repeat);}
+  .pb-if{background:var(--if-cls);}
+
+  #programArea{
+    background:rgba(255,255,255,0.55); border-radius:20px;
+    padding:14px; flex: 1; display: flex; flex-direction: column;
+    overflow: hidden; transition: background 0.3s ease;
+  }
+  body.dark-mode #programArea { background: rgba(30, 30, 46, 0.75); }
+  #programArea h2{margin:0; font-size:18px; flex-shrink: 0;}
+  
+  #programList{
+    list-style:none; margin:0; padding:0; display:flex; flex-direction:column;
+    gap:10px; flex: 1; overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; padding-right: 4px;
+    min-height: 150px;
+  }
+  #programList::-webkit-scrollbar { width: 6px; }
+  #programList::-webkit-scrollbar-track { background: transparent; }
+  #programList::-webkit-scrollbar-thumb { background: rgba(46, 51, 80, 0.3); border-radius: 10px; }
+  #programList::-webkit-scrollbar-thumb:hover { background: rgba(46, 51, 80, 0.5); }
+
+  #emptyHint{ text-align:center; color:#8891B0; padding:24px 8px; font-size:16px; pointer-events: none; }
+
+  .block{
+    display:flex; align-items:center; gap:10px; padding:12px 14px;
+    border-radius:16px; color:#fff; box-shadow:var(--shadow);
+    min-height:60px; cursor:grab; position:relative; flex-shrink: 0;
+  }
+  .block.dragging{opacity:.4;}
+  .block .emoji{font-size:26px; flex-shrink:0;}
+  .block .label{flex:1; font-size:17px;}
+  .block .stepper{
+    display:flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,0.25); border-radius:12px; padding:2px 6px;
+  }
+  .block .stepper button{
+    width:34px;height:34px; border:none;border-radius:10px;
+    background:rgba(255,255,255,0.9); font-size:18px; font-weight:bold;
+    cursor:pointer; color: #2E3350;
+  }
+  .block .stepper .val{min-width:34px; text-align:center; font-size:16px;}
+  .block .delBtn{
+    width:34px;height:34px; border:none;border-radius:10px;
+    background:rgba(0,0,0,0.15); color:#fff; font-size:16px;
+    cursor:pointer; flex-shrink:0;
+  }
+  
+  .b-forward{background:var(--forward);}
+  .b-backward{background:var(--backward);}
+  .b-turn_left{background:var(--turn);}
+  .b-turn_right{background:var(--turn);}
+  .b-buzzer{background:var(--buzzer); color:#5b4600;}
+  .b-wait{background:var(--wait);}
+  .b-repeat{background:var(--repeat); flex-wrap:wrap;}
+  .b-if{background:var(--if-cls); flex-wrap:wrap;}
+
+  .repeatChildren{
+    width:100%; margin-top:8px; padding:12px 8px 8px;
+    border-radius:12px; background:rgba(255,255,255,0.2);
+    display:flex; flex-direction:column; gap:8px;
+    min-height: 65px; transition: all 0.2s ease;
+  }
+  body.dark-mode .repeatChildren { background:rgba(0,0,0,0.3); }
+
+  /* 💡 삽입 위치를 알려주는 파란색 가이드 라인 (드롭 인디케이터) */
+  .block.drag-top::before {
+    content: ''; position: absolute;
+    top: -7px; left: 0; right: 0; height: 5px;
+    background: #4C8DFF; border-radius: 3px; z-index: 10;
+  }
+  .block.drag-bottom::after {
+    content: ''; position: absolute;
+    bottom: -7px; left: 0; right: 0; height: 5px;
+    background: #4C8DFF; border-radius: 3px; z-index: 10;
+  }
+  
+  /* 💡 '반복' 블럭 안으로 쏙 넣을 때의 하이라이트 박스 */
+  .repeatChildren.drag-inside {
+    background: rgba(76, 141, 255, 0.2) !important;
+    outline: 3px dashed #4C8DFF !important;
+  }
+  body.dark-mode .repeatChildren.drag-inside { background: rgba(76, 141, 255, 0.3) !important; }
+
+  .repeatChildren .block{box-shadow:none; min-height:50px;}
+  .addToRepeat{ display:flex; gap:6px; flex-wrap:wrap; width:100%; }
+  .addToRepeat button{
+    border:none; border-radius:10px; padding:6px 10px; font-size:18px;
+    background:rgba(255,255,255,0.85); cursor:pointer;
+  }
+
+  .block.running{ outline:4px solid #FFF200; animation:pulse 0.9s infinite; }
+  @keyframes pulse{ 0%{transform:scale(1);} 50%{transform:scale(1.03);} 100%{transform:scale(1);} }
+
+  #lockOverlay{ position:fixed; inset:0; background:rgba(255,255,255,0.01); display:none; z-index:5; }
+  body.locked #lockOverlay{display:block;}
+  body.locked .paletteBtn, body.locked .delBtn, body.locked .stepper button, body.locked .addToRepeat button{
+    pointer-events:none; opacity:0.45;
+  }
+  body.locked .block{cursor:default;}
+
+  footer{
+    position:fixed; left:0; right:0; bottom:0;
+    padding:16px 20px calc(16px + env(safe-area-inset-bottom));
+    display:flex; align-items:center; justify-content:center; gap:24px;
+    background:linear-gradient(180deg, rgba(255,246,224,0) 0%, rgba(255,246,224,0.95) 30%); z-index:10;
+  }
+  body.dark-mode footer { background:linear-gradient(180deg, rgba(22,33,62,0) 0%, rgba(22,33,62,0.95) 30%); }
+
+  #stopBtn, #runBtn{
+    border:none; border-radius:50%; width:96px; height:96px; font-size:15px; color:#fff;
+    box-shadow:0 8px 0 rgba(0,0,0,0.15);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    cursor:pointer; font-family:'Jua',sans-serif;
+  }
+  #runBtn{background:radial-gradient(circle at 35% 30%, #6FE39B, #2FA968); }
+  #runBtn .emoji{font-size:34px;}
+  #runBtn:disabled{background:#cfd6e6; box-shadow:0 8px 0 rgba(0,0,0,0.08); cursor:not-allowed;}
+  #runBtn:active:not(:disabled){transform:translateY(6px); box-shadow:0 2px 0 rgba(0,0,0,0.15);}
+
+  #stopBtn{ background:radial-gradient(circle at 35% 30%, #FF9C9C, var(--danger)); opacity:0.35; pointer-events:none; }
+  #stopBtn.active{opacity:1; pointer-events:auto;}
+  #stopBtn:active.active{transform:translateY(6px); box-shadow:0 2px 0 rgba(0,0,0,0.15);}
+  #stopBtn .emoji{font-size:30px;}
+
+  #banner{
+    position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-140%);
+    background:#fff; border-radius:24px; padding:18px 26px; box-shadow:0 10px 24px rgba(0,0,0,0.18);
+    font-size:20px; text-align:center; max-width:88vw; z-index:20; transition:transform .25s ease; color: #2E3350;
+  }
+  #banner.show{transform:translateX(-50%) translateY(0);}
+  #banner .big{font-size:40px; display:block; margin-bottom:6px;}
+</style>
+
+<script>
+// ROSLIB 임베딩 (변경 없음)
+(function(window) {
+  var EventEmitter = function() { this._events = {}; };
+  EventEmitter.prototype.on = function(type, listener) {
+    this._events[type] = this._events[type] || [];
+    this._events[type].push(listener);
+    return this;
+  };
+  EventEmitter.prototype.once = function(type, listener) {
+    var self = this;
+    function g() { self.removeListener(type, g); listener.apply(this, arguments); }
+    this.on(type, g);
+    return this;
+  };
+  EventEmitter.prototype.removeListener = function(type, listener) {
+    if (!this._events[type]) return this;
+    var idx = this._events[type].indexOf(listener);
+    if (idx >= 0) this._events[type].splice(idx, 1);
+    return this;
+  };
+  EventEmitter.prototype.emit = function(type) {
+    if (!this._events[type]) return false;
+    var args = Array.prototype.slice.call(arguments, 1);
+    var listeners = this._events[type].slice();
+    for (var i = 0; i < listeners.length; i++) listeners[i].apply(this, args);
+    return true;
+  };
+  var Ros = function(options) {
+    EventEmitter.call(this); this.url = options.url; this.idCounter = 0; this.isConnected = false;
+    this.socket = new WebSocket(this.url);
+    this.socket.onopen = this._onOpen.bind(this); this.socket.onmessage = this._onMessage.bind(this);
+    this.socket.onerror = this._onError.bind(this); this.socket.onclose = this._onClose.bind(this);
+  };
+  Ros.prototype = Object.create(EventEmitter.prototype);
+  Ros.prototype._onOpen = function() { this.isConnected = true; this.emit('connection'); };
+  Ros.prototype._onMessage = function(data) { var msg = JSON.parse(data.data); if (msg.op === 'publish') { this.emit(msg.topic, msg.msg); } };
+  Ros.prototype._onError = function(err) { this.emit('error', err); };
+  Ros.prototype._onClose = function(close) { this.isConnected = false; this.emit('close', close); };
+  Ros.prototype.close = function() { this.socket.close(); };
+  Ros.prototype.callOnConnection = function(message) {
+    var self = this;
+    if (!this.isConnected) { setTimeout(function() { self.callOnConnection(message); }, 100);
+    } else { this.socket.send(JSON.stringify(message)); }
+  };
+  var Topic = function(options) { this.ros = options.ros; this.name = options.name; this.messageType = options.messageType; };
+  Topic.prototype.subscribe = function(callback) {
+    this.ros.on(this.name, callback); this.ros.callOnConnection({ op: 'subscribe', topic: this.name, type: this.messageType });
+  };
+  Topic.prototype.publish = function(message) { this.ros.callOnConnection({ op: 'publish', topic: this.name, msg: message }); };
+  var Message = function(values) { Object.assign(this, values); };
+  window.ROSLIB = { Ros: Ros, Topic: Topic, Message: Message };
+})(window);
+</script>
+</head>
+<body>
+
+<div id="lockOverlay"></div>
+
+<header>
+  <h1>🤖 로봇 블록 놀이터</h1>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <button id="darkModeBtn" style="border:none; background:#fff; width:34px; height:34px; border-radius:50%; box-shadow:var(--shadow); cursor:pointer; font-size:16px;">🌙</button>
+    <span id="connState" class="bad">연결 안 됨</span>
+  </div>
+</header>
+
+<div id="connectPanel">
+  <input id="wsUrl" placeholder="ws://로봇주소:9090" value="ws://192.168.0.15:9090">
+  <button id="connectBtn">연결하기</button>
+  <button id="simToggle">🧪 연습 모드</button>
+  <button id="exportBtn" style="background:#5b4b9c;">📥 내보내기</button>
+  <button id="importBtn" style="background:#5b4b9c;">📤 불러오기</button>
+  <input type="file" id="fileInput" accept=".json" style="display:none;">
+</div>
+
+<div id="aiPanel">
+  <div class="aiTitle">
+    <strong>✨ AI 블록 만들기</strong>
+    <small>예: 앞으로 3초 가고 오른쪽으로 돌고, 소리 내고 1초 기다리기</small>
+  </div>
+  <textarea id="aiPrompt" placeholder="하고 싶은 동작을 말로 적어보세요. 예) 앞으로 2초 → 왼쪽 → 앞으로 1초 → 소리"></textarea>
+  <div class="aiControls">
+    <button id="aiGenerateBtn">✨ AI로 블록 추가</button>
+    <button id="aiReplaceBtn">🔄 AI로 전체 바꾸기</button>
+    <button id="aiClearBtn">🧹 입력 지우기</button>
+    <button class="aiChip" data-prompt="앞으로 3초 가고 오른쪽으로 돌고 소리 내기">예시 1</button>
+    <button class="aiChip" data-prompt="앞으로 2초 가고 왼쪽으로 돌고 1초 기다리고 앞으로 1초">예시 2</button>
+    <button class="aiChip" data-prompt="반복 3번: 앞으로 1초 가고 오른쪽으로 돌기">반복 예시</button>
+    <button class="aiChip" data-prompt="장애물이 있으면 소리 내고 뒤로 1초 가기">조건 예시</button>
+  </div>
+  <div id="aiResult"></div>
+</div>
+
+<main>
+  <section id="palette" aria-label="블록 팔레트">
+    <button class="paletteBtn pb-forward" data-op="forward"><span class="emoji">⬆️</span>앞으로</button>
+    <button class="paletteBtn pb-backward" data-op="backward"><span class="emoji">⬇️</span>뒤로</button>
+    <button class="paletteBtn pb-turn_left" data-op="turn_left"><span class="emoji">↩️</span>왼쪽</button>
+    <button class="paletteBtn pb-turn_right" data-op="turn_right"><span class="emoji">↪️</span>오른쪽</button>
+    <button class="paletteBtn pb-buzzer" data-op="buzzer"><span class="emoji">🔔</span>소리</button>
+    <button class="paletteBtn pb-wait" data-op="wait"><span class="emoji">⏱️</span>기다리기</button>
+    <button class="paletteBtn pb-repeat" data-op="repeat"><span class="emoji">🔁</span>반복하기</button>
+    <button class="paletteBtn pb-if" data-op="if"><span class="emoji">❓</span>만약에</button>
+  </section>
+
+  <section id="programArea">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-shrink:0;">
+      <h2>나의 프로그램</h2>
+      <button id="togglePaletteBtn" style="border:none; background:rgba(0,0,0,0.08); padding:6px 12px; border-radius:12px; cursor:pointer; font-family:'Jua',sans-serif; color:var(--ink);">◀ 팔레트 숨기기</button>
+    </div>
+    
+    <ul id="programList">
+      <p id="emptyHint">위에서 블록을 눌러 여기에 순서대로 쌓아보세요!</p>
+    </ul>
+  </section>
+</main>
+
+<div id="banner"><span class="big">🎉</span>완료!</div>
+
+<footer>
+  <button id="stopBtn"><span class="emoji">✋</span>멈춰!</button>
+  <button id="runBtn"><span class="emoji">▶️</span>실행</button>
+</footer>
+
+<script>
+let program = [];      
+let idSeq = 1;
+let running = false;
+let simMode = false;
+let ros = null;
+let progTopic = null, stopTopic = null, stateTopic = null;
+
+let dragSrcId = null; 
+let dragOverPosition = 'bottom'; // 'top' 또는 'bottom'
+
+const listEl = document.getElementById('programList');
+const emptyHint = document.getElementById('emptyHint');
+const runBtn = document.getElementById('runBtn');
+const stopBtn = document.getElementById('stopBtn');
+const bannerEl = document.getElementById('banner');
+const connStateEl = document.getElementById('connState');
+const simToggle = document.getElementById('simToggle');
+
+const OP_META = {
+  forward:  {emoji:'⬆️', label:'앞으로', cls:'forward', hasSec:true},
+  backward: {emoji:'⬇️', label:'뒤로 가기', cls:'backward', hasSec:true},
+  turn_left:{emoji:'↩️', label:'왼쪽으로 돌기', cls:'turn_left'},
+  turn_right:{emoji:'↪️', label:'오른쪽으로 돌기', cls:'turn_right'},
+  buzzer:   {emoji:'🔔', label:'소리 내기', cls:'buzzer'},
+  wait:     {emoji:'⏱️', label:'기다리기', cls:'wait', hasSec:true},
+  repeat:   {emoji:'🔁', label:'반복하기', cls:'repeat', hasCount:true},
+  if:       {emoji:'❓', label:'만약 앞 장애물 발견하면', cls:'if'}
+};
+
+
+// -----------------------------------------------------
+// ✨ AI 자연어 → 블록 변환 기능
+// - 외부 API 키 없이 바로 동작하는 규칙 기반 AI 파서입니다.
+// - GPT API를 붙이고 싶다면 parseNaturalLanguageToBlocks() 대신 서버 응답 JSON을
+//   rebuildFromSerialized()로 변환해서 program에 넣으면 됩니다.
+// -----------------------------------------------------
+const KOR_NUM = {
+  '영':0, '공':0, '한':1, '하나':1, '첫':1, '일':1,
+  '두':2, '둘':2, '이':2, '세':3, '셋':3, '삼':3,
+  '네':4, '넷':4, '사':4, '다섯':5, '오':5,
+  '여섯':6, '육':6, '일곱':7, '칠':7,
+  '여덟':8, '팔':8, '아홉':9, '구':9, '열':10, '십':10
+};
+
+function wordToNumber(raw, fallback=1){
+  if (raw === undefined || raw === null) return fallback;
+  const s = String(raw).trim().replace(/번|회|초|동안|만큼/g, '');
+  if (!s) return fallback;
+  const n = parseFloat(s);
+  if (!Number.isNaN(n)) return n;
+  return KOR_NUM[s] ?? fallback;
+}
+
+function cloneBlockWithoutId(block){
+  const nb = newBlock(block.op);
+  if (block.sec !== undefined) nb.sec = block.sec;
+  if (block.count !== undefined) nb.count = block.count;
+  if (block.children) nb.children = block.children.map(cloneBlockWithoutId);
+  return nb;
+}
+
+function rebuildFromSerialized(list){
+  return list.map(b => {
+    const nb = newBlock(b.op);
+    if (b.sec !== undefined) nb.sec = b.sec;
+    if (b.count !== undefined) nb.count = b.count;
+    if (b.blocks) nb.children = rebuildFromSerialized(b.blocks);
+    if (b.then) nb.children = rebuildFromSerialized(b.then);
+    return nb;
+  });
+}
+
+function extractSeconds(segment, fallback){
+  const secMatch = segment.match(/(\d+(?:\.\d+)?|한|하나|두|둘|세|셋|네|넷|다섯|여섯|일곱|여덟|아홉|열)\s*(초|sec|second|seconds)/i);
+  if (secMatch) return Math.max(0.5, Math.min(10, wordToNumber(secMatch[1], fallback)));
+  const longMatch = segment.match(/(잠깐|조금)/);
+  if (longMatch) return 1;
+  return fallback;
+}
+
+function makeAiBlock(op, segment=''){
+  const b = newBlock(op);
+  if (op === 'forward' || op === 'backward') b.sec = extractSeconds(segment, b.sec ?? 3);
+  if (op === 'wait') b.sec = extractSeconds(segment, b.sec ?? 1);
+  return b;
+}
+
+function commandMatches(text){
+  const patterns = [
+    {op:'forward', re:/(앞으로|전진|앞\s*으로|go\s*forward|forward)/ig},
+    {op:'backward', re:/(뒤로|후진|뒤\s*로|backward|back)/ig},
+    {op:'turn_left', re:/(왼쪽|좌회전|왼\s*쪽|left)/ig},
+    {op:'turn_right', re:/(오른쪽|우회전|오른\s*쪽|right)/ig},
+    {op:'buzzer', re:/(소리|부저|삐|알림|경고음|buzzer|beep|sound)/ig},
+    {op:'wait', re:/(기다|대기|쉬|멈춰서|wait|pause|sleep)/ig}
+  ];
+  const matches = [];
+  for (const p of patterns){
+    let m;
+    while ((m = p.re.exec(text)) !== null){
+      matches.push({op:p.op, index:m.index, end:p.re.lastIndex});
+    }
+  }
+  return matches.sort((a,b)=>a.index-b.index);
+}
+
+function parseSimpleCommands(text){
+  const matches = commandMatches(text);
+  const blocks = [];
+  if (matches.length === 0) return blocks;
+
+  for (let i=0; i<matches.length; i++){
+    const cur = matches[i];
+    const next = matches[i+1];
+    const segment = text.slice(cur.index, next ? next.index : text.length);
+    blocks.push(makeAiBlock(cur.op, segment));
+  }
+  return blocks;
+}
+
+function parseRepeatCommand(text){
+  // 예: "반복 3번: 앞으로 1초 가고 오른쪽", "앞으로 1초 가고 오른쪽을 3번 반복"
+  let m = text.match(/반복\s*(\d+(?:\.\d+)?|한|하나|두|둘|세|셋|네|넷|다섯|여섯|일곱|여덟|아홉|열)?\s*(번|회)?\s*[:：,-]?\s*(.+)/i);
+  if (m && m[3]){
+    const count = Math.max(2, Math.min(10, wordToNumber(m[1] || '2', 2)));
+    const children = parseSimpleCommands(m[3]);
+    if (children.length){
+      const b = newBlock('repeat');
+      b.count = count;
+      b.children = children;
+      return b;
+    }
+  }
+
+  m = text.match(/(.+?)\s*(\d+(?:\.\d+)?|한|하나|두|둘|세|셋|네|넷|다섯|여섯|일곱|여덟|아홉|열)\s*(번|회)\s*반복/i);
+  if (m && m[1]){
+    const children = parseSimpleCommands(m[1]);
+    if (children.length){
+      const b = newBlock('repeat');
+      b.count = Math.max(2, Math.min(10, wordToNumber(m[2], 2)));
+      b.children = children;
+      return b;
+    }
+  }
+  return null;
+}
+
+function parseIfCommand(text){
+  // 예: "장애물이 있으면 소리 내고 뒤로 1초 가기"
+  if (!/(장애물|앞에|부딪|감지|위험|obstacle|if)/i.test(text)) return null;
+  const thenText = (text.split(/있으면|감지하면|만나면|발견하면|if/i)[1] || text);
+  let children = parseSimpleCommands(thenText);
+
+  // 조건만 쓰면 안전 동작을 자동으로 넣어줍니다.
+  if (children.length === 0){
+    children = [makeAiBlock('buzzer'), makeAiBlock('backward', '뒤로 1초'), makeAiBlock('turn_right')];
+  }
+  const b = newBlock('if');
+  b.children = children;
+  return b;
+}
+
+function parseNaturalLanguageToBlocks(rawText){
+  const text = rawText
+    .replace(/\n/g, ' ')
+    .replace(/그리고|그다음|다음에|후에|한다음|하고나서/g, ' 그리고 ')
+    .trim();
+
+  const blocks = [];
+  const ifBlock = parseIfCommand(text);
+  const repeatBlock = parseRepeatCommand(text);
+
+  // 조건/반복이 문장 전체의 핵심이면 우선 변환합니다.
+  if (ifBlock) blocks.push(ifBlock);
+  if (repeatBlock && !ifBlock) blocks.push(repeatBlock);
+
+  if (blocks.length === 0){
+    blocks.push(...parseSimpleCommands(text));
+  }
+
+  // "앞으로 가기 3번"처럼 명령 뒤의 횟수를 반복으로 감싸기
+  const repeatCountMatch = text.match(/(\d+|한|하나|두|둘|세|셋|네|넷|다섯|여섯|일곱|여덟|아홉|열)\s*(번|회)/);
+  const hasExplicitRepeatWord = /반복/.test(text);
+  const hasSeconds = /초|sec|second/i.test(text);
+  if (!hasExplicitRepeatWord && !hasSeconds && blocks.length === 1 && repeatCountMatch){
+    const repeat = newBlock('repeat');
+    repeat.count = Math.max(2, Math.min(10, wordToNumber(repeatCountMatch[1], 2)));
+    repeat.children = [cloneBlockWithoutId(blocks[0])];
+    return [repeat];
+  }
+
+  return blocks;
+}
+
+function previewAiBlocks(blocks){
+  function blockLabel(b){
+    const meta = OP_META[b.op] || {emoji:'❔', label:b.op};
+    let extra = '';
+    if (b.sec !== undefined) extra = ` ${b.sec}초`;
+    if (b.count !== undefined) extra = ` ${b.count}회`;
+    if (b.children) extra += ` 안에 ${b.children.length}개`;
+    return `<span class="aiPreviewBlock">${meta.emoji} ${meta.label}${extra}</span>`;
+  }
+  const resultEl = document.getElementById('aiResult');
+  if (!blocks.length){
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = '😅 아직 이해하지 못했어요. 예: <b>앞으로 2초 가고 오른쪽으로 돌고 소리 내기</b>';
+    return;
+  }
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '<b>생성될 블록</b><br>' + blocks.map(blockLabel).join('');
+}
+
+function applyAiBlocks(replace=false){
+  if (running) return;
+  const input = document.getElementById('aiPrompt');
+  const text = input.value.trim();
+  if (!text){ showBanner('💬', '명령을 먼저 적어주세요!', 1500); return; }
+
+  const blocks = parseNaturalLanguageToBlocks(text);
+  previewAiBlocks(blocks);
+  if (!blocks.length){ playErrorSound(); return; }
+
+  if (replace) program = blocks;
+  else program.push(...blocks);
+  render();
+  showBanner('✨', replace ? 'AI가 프로그램을 바꿨어요!' : 'AI가 블록을 추가했어요!', 1800);
+}
+
+
+// --- [중첩 배열 데이터 처리 헬퍼] ---
+function extractBlock(id, list = program) {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].id === id) return list.splice(i, 1)[0];
+    if (list[i].children) {
+      const found = extractBlock(id, list[i].children);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function findBlock(id, list = program) {
+  for (const b of list) {
+    if (b.id === id) return b;
+    if (b.children) {
+      const found = findBlock(id, b.children);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function findParentListAndIndex(targetId, list = program) {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].id === targetId) return { list, index: i };
+    if (list[i].children) {
+      const res = findParentListAndIndex(targetId, list[i].children);
+      if (res) return res;
+    }
+  }
+  return null;
+}
+
+// 블록 안에 자신을 집어넣어 발생하는 무한 에러 방지
+function isDescendant(parentId, targetId) {
+  const parent = findBlock(parentId);
+  if (!parent) return false;
+  if (parent.id === targetId) return true;
+  function check(node) {
+    if (node.id === targetId) return true;
+    if (node.children) {
+      for (const c of node.children) {
+        if (check(c)) return true;
+      }
+    }
+    return false;
+  }
+  return check(parent);
+}
+
+function playLaptopBuzzer() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99, 1046.50]; 
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (i + 1) * 0.08);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.08); osc.stop(ctx.currentTime + (i + 1) * 0.08);
+    });
+  } catch(e) {}
+}
+
+function playErrorSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [493.88, 349.23]; 
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = 'sawtooth'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (i + 1) * 0.15);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.15); osc.stop(ctx.currentTime + (i + 1) * 0.15);
+    });
+  } catch(e) {}
+}
+
+function newBlock(op){
+  const b = {id: idSeq++, op};
+  if (op === 'forward' || op === 'backward') b.sec = 3; 
+  if (op === 'wait') b.sec = 1;
+  if (op === 'repeat'){ b.count = 2; b.children = []; }
+  if (op === 'if'){ b.children = []; }
+  return b;
+}
+
+function removeBlock(id, list=program){
+  const idx = list.findIndex(b=>b.id===id);
+  if (idx>=0){ list.splice(idx,1); return true; }
+  for (const b of list){
+    if (b.children && removeBlock(id, b.children)) return true;
+  }
+  return false;
+}
+
+function render(){
+  listEl.innerHTML = '';
+  listEl.appendChild(emptyHint);
+  
+  if(program.length > 0) {
+    emptyHint.style.display = 'none';
+    program.forEach(b => listEl.appendChild(renderBlock(b)));
+  } else {
+    emptyHint.style.display = 'block';
+  }
+}
+
+// -----------------------------------------------------
+// 💡 드래그 앤 드롭 심장부 (블럭 그리기 및 이벤트 할당)
+// -----------------------------------------------------
+function renderBlock(b){
+  const meta = OP_META[b.op];
+  const li = document.createElement('li');
+  li.className = `block b-${meta.cls}`;
+  li.dataset.id = b.id;
+  li.draggable = !running;
+
+  const emoji = document.createElement('span');
+  emoji.className = 'emoji'; emoji.textContent = meta.emoji;
+  li.appendChild(emoji);
+
+  const label = document.createElement('span');
+  label.className = 'label'; label.textContent = meta.label;
+  li.appendChild(label);
+
+  if (meta.hasSec){ li.appendChild(makeStepper(b.sec, 0.5, 0.5, 10, v=>{ b.sec = v; })); }
+  if (meta.hasCount){ li.appendChild(makeStepper(b.count, 1, 2, 10, v=>{ b.count = v; }, '회')); }
+
+  const del = document.createElement('button');
+  del.className = 'delBtn'; del.textContent = '✕';
+  del.onclick = (e)=>{ e.stopPropagation(); removeBlock(b.id); render(); };
+  li.appendChild(del);
+
+  // 컨테이너 블록 (반복문, IF문)
+  if (b.op === 'repeat' || b.op === 'if'){
+    const childWrap = document.createElement('div');
+    childWrap.className = 'repeatChildren';
+    b.children.forEach(cb => childWrap.appendChild(renderBlock(cb)));
+
+    const addRow = document.createElement('div');
+    addRow.className = 'addToRepeat';
+    ['forward','backward','turn_left','turn_right','buzzer','wait','repeat','if'].forEach(op=>{
+      const m = OP_META[op];
+      const btn = document.createElement('button');
+      btn.textContent = m.emoji;
+      btn.onclick = (e)=>{ e.stopPropagation(); b.children.push(newBlock(op)); render(); };
+      addRow.appendChild(btn);
+    });
+    childWrap.appendChild(addRow);
+    li.appendChild(childWrap);
+
+    // [중첩 영역으로 드롭]
+    childWrap.addEventListener('dragover', (e) => {
+      e.preventDefault(); e.stopPropagation(); 
+      if (!running && dragSrcId !== null && dragSrcId !== b.id && !isDescendant(dragSrcId, b.id)) {
+        childWrap.classList.add('drag-inside');
+      }
+    });
+    childWrap.addEventListener('dragleave', (e) => {
+      e.stopPropagation(); childWrap.classList.remove('drag-inside');
+    });
+    childWrap.addEventListener('drop', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      childWrap.classList.remove('drag-inside');
+      if (running || dragSrcId == null || dragSrcId === b.id) return;
+      if (isDescendant(dragSrcId, b.id)) { showBanner('⚠️', '안에 넣을 수 없어요!', 1500); return; }
+
+      const draggedBlock = extractBlock(dragSrcId);
+      if (draggedBlock) {
+          b.children.push(draggedBlock); 
+          render();
+      }
+      dragSrcId = null;
+    });
+  }
+
+  // [블럭 자체 드래그 시작] 💡 커서 고정(Ghost) 및 투명화
+  li.addEventListener('dragstart', (e)=>{ 
+    if(running) { e.preventDefault(); return; }
+    e.stopPropagation();
+    li.classList.add('dragging'); 
+    dragSrcId = b.id; 
+
+    // 깔끔한 커스텀 드래그 유령 이미지 생성
+    const ghost = document.createElement('div');
+    ghost.style.position = 'absolute'; ghost.style.top = '-1000px';
+    ghost.style.background = getComputedStyle(li).backgroundColor;
+    ghost.style.color = '#fff'; ghost.style.padding = '10px 18px';
+    ghost.style.borderRadius = '16px'; ghost.style.fontFamily = "'Jua', sans-serif";
+    ghost.style.fontSize = '18px'; ghost.style.boxShadow = 'var(--shadow)';
+    ghost.textContent = meta.emoji + ' ' + meta.label;
+    document.body.appendChild(ghost);
+    
+    // 마우스 커서를 블록의 좌측 상단 (20px, 20px)에 정확히 고정시킵니다.
+    e.dataTransfer.setDragImage(ghost, 20, 20);
+    setTimeout(() => document.body.removeChild(ghost), 0);
+  });
+  
+  li.addEventListener('dragend', (e)=> {
+    e.stopPropagation();
+    li.classList.remove('dragging');
+    document.querySelectorAll('.drag-top, .drag-bottom').forEach(el => el.classList.remove('drag-top', 'drag-bottom'));
+    dragSrcId = null;
+  });
+  
+  // [블럭 사이사이 드롭선 표시]
+  li.addEventListener('dragover', (e)=>{ 
+    e.preventDefault(); e.stopPropagation();
+    if (running || dragSrcId == null || dragSrcId === b.id || isDescendant(dragSrcId, b.id)) return;
+
+    const rect = li.getBoundingClientRect();
+    const offsetY = e.clientY - rect.top;
+    let headerHeight = (b.op === 'repeat' || b.op === 'if') ? 60 : rect.height; // 헤더 부분 기준 계산
+
+    li.classList.remove('drag-top', 'drag-bottom');
+    if (offsetY < headerHeight / 2) {
+        li.classList.add('drag-top');
+        dragOverPosition = 'top';
+    } else if (offsetY <= headerHeight) {
+        li.classList.add('drag-bottom');
+        dragOverPosition = 'bottom';
+    }
+  });
+
+  li.addEventListener('dragleave', (e)=>{
+    e.stopPropagation();
+    li.classList.remove('drag-top', 'drag-bottom');
+  });
+  
+  li.addEventListener('drop', (e)=>{
+    e.preventDefault(); e.stopPropagation();
+    li.classList.remove('drag-top', 'drag-bottom');
+    
+    if (running || dragSrcId == null || dragSrcId === b.id) return;
+    if (isDescendant(dragSrcId, b.id)) { showBanner('⚠️', '자신 안에 넣을 수 없어요!', 1500); return; }
+
+    const draggedBlock = extractBlock(dragSrcId);
+    if (draggedBlock) {
+        const targetInfo = findParentListAndIndex(b.id);
+        if (targetInfo) {
+            let insertIdx = targetInfo.index;
+            if (dragOverPosition === 'bottom') insertIdx += 1;
+            targetInfo.list.splice(insertIdx, 0, draggedBlock); // 파란 선 위치에 정확히 삽입
+        } else {
+            program.push(draggedBlock);
+        }
+        render();
+    }
+    dragSrcId = null;
+  });
+
+  return li;
+}
+
+// 메인 빈 리스트 배경 드롭 처리 (가장 맨 끝으로 이동)
+listEl.addEventListener('dragover', (e) => { e.preventDefault(); });
+listEl.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (running || dragSrcId == null) return;
+  const draggedBlock = extractBlock(dragSrcId);
+  if (draggedBlock) {
+      program.push(draggedBlock); 
+      render();
+  }
+  dragSrcId = null;
+});
+
+function makeStepper(value, step, min, max, onChange, suffix=''){
+  const wrap = document.createElement('div'); wrap.className = 'stepper';
+  const minus = document.createElement('button'); minus.textContent = '−';
+  const val = document.createElement('span'); val.className = 'val';
+  const plus = document.createElement('button'); plus.textContent = '+';
+  let cur = value;
+  function paint(){ val.textContent = (Number.isInteger(step)? cur : cur.toFixed(1)) + suffix + (suffix? '' : '초'); }
+  paint();
+  minus.onclick = (e)=>{ e.stopPropagation(); cur = Math.max(min, +(cur-step).toFixed(1)); onChange(cur); paint(); };
+  plus.onclick  = (e)=>{ e.stopPropagation(); cur = Math.min(max, +(cur+step).toFixed(1)); onChange(cur); paint(); };
+  wrap.appendChild(minus); wrap.appendChild(val); wrap.appendChild(plus);
+  return wrap;
+}
+
+
+document.getElementById('aiGenerateBtn').addEventListener('click', () => applyAiBlocks(false));
+document.getElementById('aiReplaceBtn').addEventListener('click', () => applyAiBlocks(true));
+document.getElementById('aiClearBtn').addEventListener('click', () => {
+  document.getElementById('aiPrompt').value = '';
+  const resultEl = document.getElementById('aiResult');
+  resultEl.style.display = 'none';
+});
+document.getElementById('aiPrompt').addEventListener('input', (e) => {
+  const text = e.target.value.trim();
+  if (!text){
+    const resultEl = document.getElementById('aiResult');
+    resultEl.style.display = 'none';
+    return;
+  }
+  previewAiBlocks(parseNaturalLanguageToBlocks(text));
+});
+document.querySelectorAll('.aiChip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('aiPrompt').value = btn.dataset.prompt;
+    previewAiBlocks(parseNaturalLanguageToBlocks(btn.dataset.prompt));
+  });
+});
+
+document.querySelectorAll('.paletteBtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if (running) return;
+    program.push(newBlock(btn.dataset.op));
+    render();
+  });
+});
+
+function serializeProgram(list) {
+  return list.map(b => {
+    if (b.op === 'repeat') {
+      return { op: 'repeat', count: b.count, blocks: serializeProgram(b.children) };
+    } else if (b.op === 'if') {
+      return { op: 'if', cond: 'front_obstacle', then: serializeProgram(b.children) };
+    } else {
+      const {id, children, ...rest} = b;
+      return rest;
+    }
+  });
+}
+
+function setLocked(locked){
+  running = locked;
+  document.body.classList.toggle('locked', locked);
+  runBtn.disabled = locked;
+  stopBtn.classList.toggle('active', locked);
+}
+
+function clearHighlights(){ document.querySelectorAll('.block.running').forEach(el=>el.classList.remove('running')); }
+
+function showBanner(emoji, text, ms=2200){
+  bannerEl.innerHTML = `<span class="big">${emoji}</span>${text}`;
+  bannerEl.classList.add('show');
+  clearTimeout(showBanner._t);
+  showBanner._t = setTimeout(()=> bannerEl.classList.remove('show'), ms);
+}
+
+const KID_REASONS = { '장애물 감지': ['🙈', '앞에 뭔가 있어요!'], '사용자 중지': ['✋', '멈췄어요!'] };
+
+function highlightActiveBlock(op) {
+  clearHighlights();
+  if (!op) return;
+  const blocks = document.querySelectorAll(`.block.b-${op}`);
+  if (blocks.length > 0) blocks[0].classList.add('running');
+}
+
+function handleRunState(s){
+  if (s.state === 'running'){
+    setLocked(true);
+  } else if (s.state === 'block'){
+    highlightActiveBlock(s.op);
+    if (s.op === 'buzzer') { playLaptopBuzzer(); }
+  } else if (s.state === 'done'){
+    clearHighlights(); setLocked(false); showBanner('🎉','완료!'); confettiBurst();
+  } else if (s.state === 'aborted'){
+    clearHighlights(); setLocked(false); 
+    const [emoji, text] = KID_REASONS[s.reason] || ['⚠️', s.reason || '멈췄어요'];
+    showBanner(emoji, text, 3000);
+    if (s.reason === '장애물 감지') { playErrorSound(); }
+  }
+}
+
+function confettiBurst(){
+  for (let i=0;i<24;i++){
+    const p = document.createElement('div');
+    const colors = ['#3FB27F','#4C8DFF','#FFC93C','#A784FF','#FF7A59'];
+    p.style.position='fixed'; p.style.left = (45+Math.random()*10)+'vw'; p.style.top = '30vh';
+    p.style.width='10px'; p.style.height='10px'; p.style.background = colors[i%colors.length];
+    p.style.borderRadius='3px'; p.style.zIndex=30; p.style.pointerEvents='none';
+    const dx = (Math.random()-0.5)*300; const dy = 200+Math.random()*200; const rot = Math.random()*360;
+    document.body.appendChild(p);
+    p.animate([
+      {transform:'translate(0,0) rotate(0deg)', opacity:1},
+      {transform:`translate(${dx}px,${dy}px) rotate(${rot}deg)`, opacity:0}
+    ], {duration:900+Math.random()*400, easing:'ease-out'});
+    setTimeout(()=>p.remove(), 1400);
+  }
+}
+
+runBtn.addEventListener('click', ()=>{
+  if (running || program.length===0) return;
+  const serialized = serializeProgram(program);
+  if (simMode || !ros){ runSimulation(serialized); return; }
+  progTopic.publish(new ROSLIB.Message({ data: JSON.stringify(serialized) }));
+});
+
+stopBtn.addEventListener('click', ()=>{
+  if (!running) return;
+  if (simMode || !ros){ stopSimulation(); return; }
+  stopTopic.publish(new ROSLIB.Message({ data: true }));
+});
+
+function flattenForSim(list){
+  const out = [];
+  for (const b of list){
+    if (b.op === 'repeat'){
+      const inner = flattenForSim(b.blocks);
+      for (let i=0;i<b.count;i++) out.push(...inner);
+    } else if (b.op === 'if') {
+      out.push(...flattenForSim(b.then));
+    } else { out.push(b); }
+  }
+  return out;
+}
+
+let simTimer = null, simIdx = 0, simFlat = [];
+function runSimulation(serialized){
+  simFlat = flattenForSim(serialized); simIdx = 0;
+  handleRunState({state:'running', total: simFlat.length});
+  simStep();
+}
+function simStep(){
+  if (simIdx >= simFlat.length){ handleRunState({state:'done'}); return; }
+  const left = simFlat.length - simIdx - 1;
+  handleRunState({state:'block', op:simFlat[simIdx].op, left});
+  const dur = (simFlat[simIdx].sec ?? (simFlat[simIdx].op==='buzzer'?0.5: (simFlat[simIdx].op.startsWith('turn')?1:0.6))) * 1000;
+  simTimer = setTimeout(()=>{ simIdx++; simStep(); }, Math.max(300, dur*300/1000+300));
+}
+function stopSimulation(){ clearTimeout(simTimer); handleRunState({state:'aborted', reason:'사용자 중지'}); }
+
+simToggle.addEventListener('click', ()=>{
+  simMode = !simMode;
+  simToggle.classList.toggle('on', simMode);
+  simToggle.textContent = simMode ? '🧪 연습 모드 (켜짐)' : '🧪 연습 모드';
+});
+
+document.getElementById('connectBtn').addEventListener('click', ()=>{
+  const url = document.getElementById('wsUrl').value.trim();
+  if (!url) return;
+  connectRos(url);
+});
+
+let reconnectTimer;
+function connectRos(url){
+  if (ros) { try{ ros.close(); }catch(e){} }
+  ros = new ROSLIB.Ros({ url });
+  ros.on('connection', ()=>{
+    connStateEl.textContent = '연결됨'; connStateEl.className = 'ok';
+    progTopic = new ROSLIB.Topic({ ros, name:'/program', messageType:'std_msgs/msg/String' });
+    stopTopic = new ROSLIB.Topic({ ros, name:'/run_stop', messageType:'std_msgs/msg/Bool' });
+    stateTopic = new ROSLIB.Topic({ ros, name:'/run_state', messageType:'std_msgs/msg/String' });
+    stateTopic.subscribe((msg)=>{
+      try{ handleRunState(JSON.parse(msg.data)); } catch(e){}
+    });
+  });
+  ros.on('error', ()=>{ connStateEl.textContent = '연결 오류'; connStateEl.className = 'bad'; });
+  ros.on('close', ()=>{ 
+    connStateEl.textContent = '재연결 중...'; connStateEl.className = 'bad'; 
+    clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(() => { if (!simMode) connectRos(url); }, 3000);
+  });
+}
+
+// -----------------------------------------------------
+// 부가 UI 기능 (다크모드, 불러오기 등)
+// -----------------------------------------------------
+const darkModeBtn = document.getElementById('darkModeBtn');
+darkModeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  darkModeBtn.textContent = isDark ? '☀️' : '🌙';
+  darkModeBtn.style.background = isDark ? '#333' : '#fff';
+  showBanner(isDark ? '🌙' : '☀️', isDark ? '다크 모드!' : '라이트 모드!', 1500);
+});
+
+const paletteEl = document.getElementById('palette');
+const togglePaletteBtn = document.getElementById('togglePaletteBtn');
+let paletteVisible = true;
+togglePaletteBtn.addEventListener('click', () => {
+  paletteVisible = !paletteVisible;
+  paletteEl.style.display = paletteVisible ? 'grid' : 'none';
+  togglePaletteBtn.textContent = paletteVisible ? '◀ 팔레트 숨기기' : '▶ 팔레트 보이기';
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  if(program.length === 0) { showBanner('⚠️', '저장할 블록이 없습니다.', 1500); return; }
+  const data = JSON.stringify(serializeProgram(program), null, 2);
+  const blob = new Blob([data], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'robot_program.json'; a.click();
+  showBanner('📥', '파일로 저장되었습니다!', 1500);
+});
+
+document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('fileInput').click(); });
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      function rebuild(list) {
+        return list.map(b => {
+          const nb = newBlock(b.op);
+          if (b.sec !== undefined) nb.sec = b.sec;
+          if (b.count !== undefined) nb.count = b.count;
+          if (b.blocks) nb.children = rebuild(b.blocks);
+          if (b.then) nb.children = rebuild(b.then);
+          return nb;
+        });
+      }
+      program = rebuild(parsed); render(); showBanner('📤', '프로그램을 불러왔습니다!', 1500);
+    } catch(err) { showBanner('❌', '파일 형식이 잘못되었습니다.', 2000); }
+    e.target.value = ''; 
+  };
+  reader.readAsText(file);
+});
+
+let saveTimer;
+const oldRender = render;
+render = function() {
+  oldRender();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { localStorage.setItem('robot_blocks', JSON.stringify(serializeProgram(program))); }, 500); 
+};
+
+window.addEventListener('load', () => {
+  const data = localStorage.getItem('robot_blocks');
+  if (data) {
+    try {
+      const parsed = JSON.parse(data);
+      function rebuild(list) {
+        return list.map(b => {
+          const nb = newBlock(b.op);
+          if (b.sec !== undefined) nb.sec = b.sec;
+          if (b.count !== undefined) nb.count = b.count;
+          if (b.blocks) nb.children = rebuild(b.blocks);
+          if (b.then) nb.children = rebuild(b.then);
+          return nb;
+        });
+      }
+      program = rebuild(parsed); oldRender(); 
+    } catch(e) {}
+  }
+});
+
+render();
+</script>
+</body>
+</html>
