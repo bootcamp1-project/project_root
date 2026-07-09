@@ -1166,6 +1166,10 @@ function publishZeroVelocity(times=3){
 }
 
 function requestEmergencyStop(reason='장애물 감지', source=''){
+  // 프로그램이 실행 중이 아니면(가만히 대기 상태) 손이 지나가도 반응하지 않습니다.
+  // 이게 없으면 로봇이 움직이지도 않는데 센서 앞을 지나갈 때마다 배너/정지 신호가 발생합니다.
+  if (!running) return;
+
   const now = Date.now();
   if (now - lastObstacleStopAt < 1200) return; // 센서가 연속 발행해도 배너 폭주 방지
   lastObstacleStopAt = now;
@@ -1261,7 +1265,7 @@ function handleRunState(s){
   } else if (state === 'aborted' || state === 'abort' || state === 'stopped' || state === 'stop' || state === 'obstacle'){
     clearHighlights(); setLocked(false); 
     const [emoji, text] = KID_REASONS[reason] || ['⚠️', reason || '멈췄어요'];
-    showBanner(emoji, text, 3200);
+    showBanner(emoji, text, 2000);
     if (reason === '장애물 감지') { playErrorSound(); publishZeroVelocity(3); }
   }
 }
