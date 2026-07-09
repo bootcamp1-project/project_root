@@ -135,17 +135,39 @@ class InterpreterNode(Node):
         if self.cur is not None:
             op = self.cur['op']
             
-            # 주행 중에 벽을 보면 현재 명령 블록만 스킵하고 제어권을 즉시 다음 블록(IF 등)으로 이양
+            # 주행 중에 벽을 보면: 다음 블록이 IF(장애물 조건)일 때만 조용히 넘기고,
+            # 그게 아니면 완전히 정지하며 /run_state로 '장애물 감지'를 알림
             if op == 'forward' and self.dist_front < OBSTACLE_M:
-                self.get_logger().warn(f"⚠️ [주행 중 탈출] 전방 장애물 감지! 다음 블록으로 이동합니다. (거리: {self.dist_front:.2f}m)")
-                self.pub_vel.publish(Twist()) 
-                self.cur = None 
-                return
-            elif op == 'backward' and self.dist_rear < OBSTACLE_M:
-                self.get_logger().warn(f"⚠️ [주행 중 탈출] 후방 장애물 감지! 다음 블록으로 이동합니다. (거리: {self.dist_rear:.2f}m)")
                 self.pub_vel.publish(Twist())
-                self.cur = None
-                return
+                next_is_if = (
+                    bool(self.program)
+                    and self.program[0].get('op') == 'if'
+                    and self.program[0].get('cond') == 'front_obstacle'
+                )
+                if next_is_if:
+                    self.get_logger().warn(f"⚠️ 전방 장애물 감지 → IF 블록으로 제어 이양 (거리: {self.dist_front:.2f}m)")
+                    self.cur = None
+                    return
+                else:
+                    self.get_logger().warn(f"🛑 전방 장애물 감지 → 프로그램 정지 (거리: {self.dist_front:.2f}m)")
+                    self.abort('장애물 감지')
+                    return
+                    
+            elif op == 'backward' and self.dist_rear < OBSTACLE_M:
+                self.pub_vel.publish(Twist())
+                next_is_if = (
+                    bool(self.program)
+                    and self.program[0].get('op') == 'if'
+                    and self.program[0].get('cond') == 'front_obstacle'
+                )
+                if next_is_if:
+                    self.get_logger().warn(f"⚠️ 후방 장애물 감지 → IF 블록으로 제어 이양 (거리: {self.dist_rear:.2f}m)")
+                    self.cur = None
+                    return
+                else:
+                    self.get_logger().warn(f"🛑 후방 장애물 감지 → 프로그램 정지 (거리: {self.dist_rear:.2f}m)")
+                    self.abort('장애물 감지')
+                    return
 
             # 모터 제어
             if op == 'forward': cmd.linear.x = LINEAR_SPEED
