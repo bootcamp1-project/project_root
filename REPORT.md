@@ -210,7 +210,7 @@ LiDAR
 - 다양한 ROS2 기반 로봇 지원
 
 
-개인 KPT — 박정호 (Full Stack 개발)
+# 개인 KPT — 박정호 (Full Stack 개발)
 
 ## Keep (잘한 점 / 유지할 점)
 - 웹 UI부터 ROS2 연동, Runtime Interpreter까지 프로젝트 전반의 기술 스택을 혼자 설계·구현하며 시스템을 일관성 있게 유지했다.
