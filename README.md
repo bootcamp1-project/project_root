@@ -397,22 +397,9 @@ ros2 launch turtlebot3_bringup robot.launch.py
 
 ---
 
-## 4. rosbridge_server 실행
+4. Block Robot 실행
 
-웹 애플리케이션과 ROS2를 연결하기 위해 rosbridge_server를 실행합니다.
-
-```bash
-cd ~/ros2_ws
-ros2 launch rosbridge_server rosbridge_websocket_launch.xml
-```
-
-기본적으로 **9090 포트(WebSocket)** 에서 대기합니다.
-
----
-
-## 5. Block Robot 실행
-
-PC에서 Interpreter 및 센서 노드를 실행합니다.
+PC에서 Block Robot을 실행합니다.
 
 ```bash
 cd ~/ros2_ws
@@ -420,15 +407,19 @@ source ~/ros2_ws/install/setup.bash
 ros2 launch block_robot bringup.launch.py
 ```
 
+bringup.launch.py를 실행하면 rosbridge_server가 자동으로 함께 실행되므로 별도로 rosbridge_server를 실행할 필요가 없습니다.
+
 실행되는 노드는 다음과 같습니다.
 
-- interpreter_node
-- ultrasonic_node
-- buzzer_node
+rosbridge_server (WebSocket 서버, 기본 포트 9090)
+interpreter_node
+ultrasonic_node
+buzzer_node
 
+실행이 완료되면 웹 애플리케이션은 9090 포트(WebSocket) 를 통해 ROS 2와 자동으로 연결됩니다.
 ---
 
-## 6. Web Server 실행
+## 5. Web Server 실행
 
 웹 애플리케이션은 정적 파일 서버를 통해 실행합니다.
 
@@ -444,7 +435,7 @@ python3 -m http.server 8000
 
 ---
 
-## 7. 웹 접속
+## 6. 웹 접속
 
 브라우저에서 다음 주소로 접속합니다.
 
