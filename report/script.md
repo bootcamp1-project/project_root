@@ -1,4 +1,4 @@
-# 🎙️ ROS 2 Humble 기반 TurtleBot3 블록 코딩 교육 플랫폼 - 발표 대본
+# 🎙️ ROS 2 Humble 기반 TurtleBot3 블록 코딩 교육 플랫폼 - 발표 대본(참고자료)
 
 ---
 
