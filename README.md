@@ -397,7 +397,7 @@ ros2 launch turtlebot3_bringup robot.launch.py
 
 ---
 
-4. Block Robot 실행
+## 4. Block Robot 실행
 
 PC에서 Block Robot을 실행합니다.
 
