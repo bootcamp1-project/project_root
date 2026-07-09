@@ -50,6 +50,7 @@
 | T-08 | Highlight | ✅ |
 | T-09 | 장애물 감지 | ✅ |
 | T-10 | Emergency Stop | ✅ |
+| T-11 | Ai 블록코딩 보조 | ✅ |
 
 ---
 
@@ -280,6 +281,22 @@ cmd_vel = 0
 
 ---
 
+## T-11 Ai블록코딩보조
+
+### 테스트
+
+Ai 블록코딩 보조기능 실행
+
+### 기대 결과
+
+프로그램 정상 수행
+
+### 결과
+
+✅ 성공
+
+---
+
 # 5. 통신 테스트
 
 ## Topic 확인
@@ -473,6 +490,7 @@ Emergency Stop
 | Emergency Stop | ✅ |
 | LiDAR | ✅ |
 | Save & Load | ✅ | 
+| Ai Block Coding Assistant | ✅ | 
 
 ---
 
