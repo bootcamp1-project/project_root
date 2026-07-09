@@ -34,7 +34,7 @@ class InterpreterNode(Node):
         self.is_running = False  
         
         self.timer = self.create_timer(0.1, self.tick)
-        self.get_logger().info('★ [반복문 내 IF문 패치] 하이브리드 트리 런타임 엔진 탑재 완료!')
+        self.get_logger().info('★ [장애물 정지 패치] IF 블록이 없으면 장애물 감지 시 즉시 정지 + run_state 알림')
 
     def send_state(self, status, **kwargs):
         msg = String()
@@ -57,7 +57,14 @@ class InterpreterNode(Node):
             self.abort('데이터 오류')
 
     def on_stop(self, msg):
-        if msg.data and self.is_running:
+        if not (msg.data and self.is_running):
+            return
+        # /run_stop 은 Bool 하나뿐이라 "왜" 멈추라는 건지 정보가 없습니다.
+        # 화면(JS)의 장애물 안전장치가 failsafe로 이 토픽을 쓰기도 하므로,
+        # 사용자가 누른 건지 장애물 때문인지는 현재 센서값으로 실제 판단합니다.
+        if self.dist_front < OBSTACLE_M or self.dist_rear < OBSTACLE_M:
+            self.abort('장애물 감지')
+        else:
             self.abort('사용자 중지')
 
     def on_dist_front(self, msg):
@@ -67,12 +74,25 @@ class InterpreterNode(Node):
         self.dist_rear = float(msg.data)
 
     def abort(self, reason):
+        # 이미 정지된 상태라면(=거의 동시에 여러 경로로 정지 신호가 들어온 경우)
+        # 중복으로 /run_state를 또 보내지 않습니다. 배너가 다른 이유로 두 번 뜨는 문제 방지.
+        if not self.is_running:
+            self.pub_vel.publish(Twist())
+            return
         self.program = []
         self.cur = None
         self.remain = 0.0
         self.is_running = False
         self.pub_vel.publish(Twist())
         self.send_state('aborted', reason=reason)
+
+    def next_is_obstacle_if(self):
+        """대기열의 바로 다음 블록이 '만약 앞 장애물' 조건 블록인지 확인합니다.
+        이 경우에만 장애물을 만나도 조용히 다음 블록(IF)으로 제어권을 넘깁니다."""
+        if not self.program:
+            return False
+        nxt = self.program[0]
+        return nxt.get('op') == 'if' and nxt.get('cond') == 'front_obstacle'
 
     def next_block(self):
         """반복문 내부에 IF문이나 다른 제어 블록이 중첩되어도 런타임에 실시간으로 한 단계씩 해석합니다."""
@@ -135,37 +155,37 @@ class InterpreterNode(Node):
         if self.cur is not None:
             op = self.cur['op']
             
-            # 주행 중에 벽을 보면: 다음 블록이 IF(장애물 조건)일 때만 조용히 넘기고,
-            # 그게 아니면 완전히 정지하며 /run_state로 '장애물 감지'를 알림
+            # 주행 중에 장애물을 만나면:
+            # - 다음에 대기 중인 블록이 '만약 앞 장애물' IF 블록이면 → 조용히 현재 블록만 취소하고
+            #   그 IF 블록이 처리하도록 넘겨줌 (소리내기/후진 등 사용자가 정의한 대응 동작 실행)
+            # - IF 블록이 없으면 → 프로그램 전체를 완전히 정지(abort)하고
+            #   /run_state로 '장애물 감지'를 알려서 화면에 "앞에 장애물이 있어요!" 배너가 뜨도록 함
             if op == 'forward' and self.dist_front < OBSTACLE_M:
                 self.pub_vel.publish(Twist())
-                next_is_if = (
-                    bool(self.program)
-                    and self.program[0].get('op') == 'if'
-                    and self.program[0].get('cond') == 'front_obstacle'
-                )
-                if next_is_if:
-                    self.get_logger().warn(f"⚠️ 전방 장애물 감지 → IF 블록으로 제어 이양 (거리: {self.dist_front:.2f}m)")
+                if self.next_is_obstacle_if():
+                    self.get_logger().warn(
+                        f"⚠️ [주행 중 탈출] 전방 장애물 감지! IF 블록으로 제어를 넘깁니다. (거리: {self.dist_front:.2f}m)"
+                    )
                     self.cur = None
                     return
                 else:
-                    self.get_logger().warn(f"🛑 전방 장애물 감지 → 프로그램 정지 (거리: {self.dist_front:.2f}m)")
+                    self.get_logger().warn(
+                        f"🛑 전방 장애물 감지! IF 블록이 없어 프로그램을 정지합니다. (거리: {self.dist_front:.2f}m)"
+                    )
                     self.abort('장애물 감지')
                     return
-                    
             elif op == 'backward' and self.dist_rear < OBSTACLE_M:
                 self.pub_vel.publish(Twist())
-                next_is_if = (
-                    bool(self.program)
-                    and self.program[0].get('op') == 'if'
-                    and self.program[0].get('cond') == 'front_obstacle'
-                )
-                if next_is_if:
-                    self.get_logger().warn(f"⚠️ 후방 장애물 감지 → IF 블록으로 제어 이양 (거리: {self.dist_rear:.2f}m)")
+                if self.next_is_obstacle_if():
+                    self.get_logger().warn(
+                        f"⚠️ [주행 중 탈출] 후방 장애물 감지! IF 블록으로 제어를 넘깁니다. (거리: {self.dist_rear:.2f}m)"
+                    )
                     self.cur = None
                     return
                 else:
-                    self.get_logger().warn(f"🛑 후방 장애물 감지 → 프로그램 정지 (거리: {self.dist_rear:.2f}m)")
+                    self.get_logger().warn(
+                        f"🛑 후방 장애물 감지! IF 블록이 없어 프로그램을 정지합니다. (거리: {self.dist_rear:.2f}m)"
+                    )
                     self.abort('장애물 감지')
                     return
 
