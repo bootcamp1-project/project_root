@@ -1,57 +1,89 @@
 #!/usr/bin/env python3
-"""ultrasonic_node: 라이다(LDS-03) 사각지대 제거 버전 (전/후방 각각 90도 부채꼴 감시)"""
+"""ultrasonic_node_fixed.py
+
+LaserScan(/scan)을 읽어서 전방/후방 장애물 최단 거리를 발행합니다.
+기존 코드처럼 ranges 인덱스를 0~359도라고 가정하지 않고,
+angle_min / angle_increment를 이용해 실제 각도를 계산합니다.
+"""
+
+import math
+from typing import Iterable, List, Optional
+
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32
+from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import LaserScan
-from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
+from std_msgs.msg import Bool, Float32
+
+OBSTACLE_M = 0.20      # 20 cm 이내면 장애물 True
+FRONT_HALF_DEG = 45.0  # 정면 기준 좌우 45도 = 총 90도
+REAR_HALF_DEG = 45.0   # 후면 기준 좌우 45도 = 총 90도
+
+
+def normalize_angle(rad: float) -> float:
+    """각도를 -pi ~ pi 범위로 정규화합니다."""
+    return math.atan2(math.sin(rad), math.cos(rad))
+
+
+def min_or_default(values: Iterable[float], default: float = 999.0) -> float:
+    vals = list(values)
+    return float(min(vals)) if vals else float(default)
+
 
 class UltrasonicNode(Node):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('ultrasonic_node')
-        
+
         self.pub_front = self.create_publisher(Float32, '/obstacle_dist/front', 10)
         self.pub_rear = self.create_publisher(Float32, '/obstacle_dist/rear', 10)
+        self.pub_front_bool = self.create_publisher(Bool, '/front_obstacle', 10)
+        self.pub_obstacle_bool = self.create_publisher(Bool, '/obstacle', 10)
 
         qos_profile = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             history=HistoryPolicy.KEEP_LAST,
-            depth=10
+            depth=10,
         )
+        self.sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, qos_profile)
+        self.get_logger().info('✅ ultrasonic_node_fixed 실행됨: LaserScan 실제 각도 기반 전/후방 감시')
 
-        self.sub = self.create_subscription(
-            LaserScan,
-            '/scan',
-            self.scan_callback,
-            qos_profile
-        )
-        self.get_logger().info('🚀 [사각지대 제로 패치] 앞/뒤 좌우 45도 대각선 영역까지 모두 감시합니다!')
+    def valid_range(self, msg: LaserScan, r: float) -> bool:
+        return math.isfinite(r) and msg.range_min < r < msg.range_max
 
-    def scan_callback(self, msg):
-        if not msg.ranges:
+    def scan_callback(self, msg: LaserScan) -> None:
+        if not msg.ranges or msg.angle_increment == 0.0:
             return
 
-        # 정면 및 대각선 사각지대 포함 (0도 기준 좌우 45도 -> 총 90도 범위)
-        front_ranges = msg.ranges[0:45] + msg.ranges[315:360]
-        
-        # 후면 및 대각선 사각지대 포함 (180도 기준 좌우 45도 -> 135 ~ 225도 범위)
-        rear_ranges = msg.ranges[135:225]
-        
-        # 유효한 거리(m)만 필터링 (센서 측정 최소/최대값 사이의 데이터만 인정)
-        valid_front = [r for r in front_ranges if msg.range_min < r < msg.range_max]
-        valid_rear = [r for r in rear_ranges if msg.range_min < r < msg.range_max]
+        front_half = math.radians(FRONT_HALF_DEG)
+        rear_half = math.radians(REAR_HALF_DEG)
+        front_values: List[float] = []
+        rear_values: List[float] = []
 
-        msg_f = Float32()
-        msg_r = Float32()
-        
-        # 감시 범위 내에서 가장 가까운 장애물 거리를 발행
-        msg_f.data = float(min(valid_front)) if valid_front else 999.0
-        msg_r.data = float(min(valid_rear)) if valid_rear else 999.0
+        for i, r in enumerate(msg.ranges):
+            if not self.valid_range(msg, float(r)):
+                continue
+            angle = normalize_angle(msg.angle_min + i * msg.angle_increment)
 
-        self.pub_front.publish(msg_f)
-        self.pub_rear.publish(msg_r)
+            # 전방: 0도 주변
+            if abs(angle) <= front_half:
+                front_values.append(float(r))
 
-def main():
+            # 후방: +180도 또는 -180도 주변
+            if abs(abs(angle) - math.pi) <= rear_half:
+                rear_values.append(float(r))
+
+        front_min = min_or_default(front_values)
+        rear_min = min_or_default(rear_values)
+
+        self.pub_front.publish(Float32(data=front_min))
+        self.pub_rear.publish(Float32(data=rear_min))
+
+        front_hit = front_min < OBSTACLE_M
+        self.pub_front_bool.publish(Bool(data=front_hit))
+        self.pub_obstacle_bool.publish(Bool(data=front_hit))
+
+
+def main() -> None:
     rclpy.init()
     node = UltrasonicNode()
     try:
@@ -61,6 +93,7 @@ def main():
     finally:
         node.destroy_node()
         rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
