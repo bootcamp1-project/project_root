@@ -131,6 +131,7 @@
   .aiControls button, .aiChip{
     border:none; border-radius:12px; padding:8px 12px;
     cursor:pointer; font-family:'Jua',sans-serif; font-size:14px;
+    transition: opacity 0.2s ease;
   }
   #aiGenerateBtn{background:#6FE39B; color:#174b2f;}
   #aiReplaceBtn{background:#4C8DFF; color:#fff;}
@@ -481,7 +482,7 @@
 </footer>
 
 <script>
-// 🔑 본인의 OpenAI API Key를 입력하세요 (실제 서비스 배포 시 프론트엔드 하드코딩 금지)
+// 🔑 본인의 OpenAI API Key를 입력하세요
 const OPENAI_API_KEY = "sk-본인의_API_키_입력";
 
 let program = [];      
@@ -495,6 +496,7 @@ const OBSTACLE_RANGE_THRESHOLD_M = 0.20;
 
 let dragSrcId = null; 
 let dragOverPosition = 'bottom'; 
+let isAiFetching = false; // AI 통신 상태를 체크하는 변수 (중복 클릭 방지)
 
 const listEl = document.getElementById('programList');
 const emptyHint = document.getElementById('emptyHint');
@@ -646,23 +648,26 @@ function parseNaturalLanguageToBlocks(rawText){
 }
 
 // --------------------------------------------------------------------------
-// 🧠 GPT API 연동 관련 로직 시작
+// 🧠 강력하게 보완된 GPT API 연동 관련 로직 시작
 // --------------------------------------------------------------------------
 
-// GPT JSON 응답을 id가 있는 실제 블록 객체 배열로 변환
+// 방어 로직이 추가된 블록 변환 함수
 function convertGPTToBlocks(gptList) {
-  return gptList.map(item => {
-    const b = newBlock(item.op);
-    if (item.sec !== undefined) b.sec = item.sec;
-    if (item.count !== undefined) b.count = item.count;
-    if (item.children) b.children = convertGPTToBlocks(item.children);
-    return b;
-  });
+  if (!Array.isArray(gptList)) return [];
+  
+  return gptList
+    .filter(item => OP_META[item.op]) // GPT가 잘못된 명령어를 만들면 무시
+    .map(item => {
+      const b = newBlock(item.op);
+      if (item.sec !== undefined) b.sec = item.sec;
+      if (item.count !== undefined) b.count = item.count;
+      if (item.children) b.children = convertGPTToBlocks(item.children);
+      return b;
+    });
 }
 
-// GPT API 비동기 호출
+// 비동기 호출 및 안전한 JSON 추출 로직
 async function fetchGPTBlocks(userText) {
-  // API Key가 없거나 기본값이면 기존 규칙 기반 엔진으로 즉시 실행
   if (!OPENAI_API_KEY || OPENAI_API_KEY === "sk-본인의_API_키_입력") {
     console.log("⚠️ API Key가 설정되지 않아 로컬(규칙 기반) 엔진으로 동작합니다.");
     return parseNaturalLanguageToBlocks(userText);
@@ -670,26 +675,13 @@ async function fetchGPTBlocks(userText) {
 
   const prompt = `
   너는 로봇 코딩 블록을 생성하는 AI야. 사용자의 자연어 명령을 분석해서 반드시 아래 규칙에 맞는 JSON 배열로만 응답해.
-  사용 가능한 op(명령어):
-  - forward (sec: 초)
-  - backward (sec: 초)
-  - turn_left
-  - turn_right
-  - buzzer
-  - wait (sec: 초)
-  - repeat (count: 반복횟수, children: 내부에 들어갈 블록 배열)
-  - if (children: 내부에 들어갈 블록 배열)
+  사용 가능한 op: forward, backward, turn_left, turn_right, buzzer, wait, repeat, if
+  - forward/backward/wait는 "sec": 초 단위 숫자 필요
+  - repeat는 "count": 반복횟수 숫자, "children": 내부 블록 배열 필요
+  - if는 "children": 내부 블록 배열 필요
   
-  예시 입력: "앞으로 2초 가고 3번 반복해(소리 내고 1초 기다리기)"
-  예시 출력:
-  [
-    {"op": "forward", "sec": 2},
-    {"op": "repeat", "count": 3, "children": [
-      {"op": "buzzer"},
-      {"op": "wait", "sec": 1}
-    ]}
-  ]
-  설명이나 마크다운 코드블록(\`\`\`) 없이 순수 JSON 배열만 반환해.
+  출력 예시:
+  [{"op": "forward", "sec": 2}, {"op": "repeat", "count": 3, "children": [{"op": "buzzer"}]}]
   `;
 
   try {
@@ -700,7 +692,7 @@ async function fetchGPTBlocks(userText) {
         "Authorization": `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini", // 빠르고 저렴한 모델
+        model: "gpt-4o-mini", 
         messages: [
           { role: "system", content: prompt },
           { role: "user", content: userText }
@@ -712,11 +704,13 @@ async function fetchGPTBlocks(userText) {
     const data = await response.json();
     if (data.error) throw new Error(data.error.message);
     
-    let resultText = data.choices[0].message.content.trim();
-    // GPT가 마크다운(```json)을 붙여서 응답할 경우를 대비하여 텍스트 정제
-    resultText = resultText.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+    const resultText = data.choices[0].message.content.trim();
     
-    const parsedData = JSON.parse(resultText);
+    // GPT가 불필요한 설명을 덧붙이더라도 배열 형태만 정확히 추출
+    const jsonMatch = resultText.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error("JSON 배열을 찾을 수 없습니다.");
+    
+    const parsedData = JSON.parse(jsonMatch[0]);
     return convertGPTToBlocks(parsedData);
 
   } catch (error) {
@@ -725,19 +719,30 @@ async function fetchGPTBlocks(userText) {
   }
 }
 
-// AI 적용 함수 (비동기로 변경)
+// 버튼 중복 클릭 방지(Lock)가 적용된 UI 제어 함수
 async function applyAiBlocks(replace = false) {
-  if (running) return;
+  if (running || isAiFetching) return;
+  
   const input = document.getElementById('aiPrompt');
   const text = input.value.trim();
   if (!text){ showBanner('💬', '명령을 먼저 적어주세요!', 1500); return; }
 
+  // UI 잠금 및 로딩 표시
+  isAiFetching = true;
+  document.getElementById('aiGenerateBtn').style.opacity = '0.5';
+  document.getElementById('aiReplaceBtn').style.opacity = '0.5';
+  
   const resultEl = document.getElementById('aiResult');
   resultEl.style.display = 'block';
   resultEl.innerHTML = '⏳ <b>AI가 코드를 생각하는 중입니다...</b>';
 
-  // 비동기로 블록 정보 가져오기 (GPT 또는 로컬 규칙)
+  // GPT 호출
   const blocks = await fetchGPTBlocks(text);
+
+  // 통신 끝, UI 잠금 해제
+  isAiFetching = false;
+  document.getElementById('aiGenerateBtn').style.opacity = '1';
+  document.getElementById('aiReplaceBtn').style.opacity = '1';
 
   if (!blocks || !blocks.length){ 
     resultEl.innerHTML = '😅 AI가 이해하지 못했거나 연결 오류가 발생했어요. 다시 시도해주세요.';
