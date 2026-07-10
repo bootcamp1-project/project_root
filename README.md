@@ -438,11 +438,17 @@ cd ~/[본인 디렉토리]/web
 python3 -m http.server 8000
 ```
 
+
 ---
 
 ## 6. 웹 접속
 
 브라우저에서 다음 주소로 접속합니다.
+
+```bash
+예시 : 192.168.0.15:8000/[파일명.html]
+```
+
 
 ```text
 http://localhost:8000/blocks.html
